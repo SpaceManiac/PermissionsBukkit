@@ -1,3 +1,18 @@
+# Eclipse stuff
+/.classpath
+/.project
+/.settings
+
+# netbeans
+/nbproject
 /build
 /dist
-/nbproject/private
+
+# we use maven!
+/build.xml
+
+# maven
+/target
+
+# vim
+.*.sw[a-p]
