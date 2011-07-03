@@ -95,7 +95,6 @@ public class PermissionsMain extends JavaPlugin {
     }
     
     private List<String> calculatePlayerPermissions(String player) {
-        System.out.println("Player " + player + "...");
         ConfigurationNode node = getConfiguration().getNode("users." + player);
         if (node == null) {
             return calculateGroupPermissions("default");
@@ -111,13 +110,10 @@ public class PermissionsMain extends JavaPlugin {
             }
         }
         
-        System.out.println("Player " + player + " has " + perms.size());
-        
         return perms;
     }
     
     private List<String> calculateGroupPermissions(String group) {
-        System.out.println("Group " + group + "...");
         ConfigurationNode node = getConfiguration().getNode("groups." + group);
         if (node == null) {
             return new ArrayList<String>();
@@ -132,8 +128,6 @@ public class PermissionsMain extends JavaPlugin {
                 }
             }
         }
-        
-        System.out.println("Group " + group + " has " + perms.size());
         
         return perms;
     }
