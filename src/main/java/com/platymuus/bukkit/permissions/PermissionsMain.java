@@ -1,5 +1,6 @@
 package com.platymuus.bukkit.permissions;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +25,12 @@ public class PermissionsMain extends JavaPlugin {
     private HashMap<Player, PermissionAttachment> permissions = new HashMap<Player, PermissionAttachment>();
 
     @Override
-    public void onEnable() {        
+    public void onEnable() {
+        // Write some default configuration
+        if (!new File(getDataFolder(), "config.yml").exists()) {
+            writeDefaultConfiguration();
+        }
+        
         // Commands
         getCommand("permissions").setExecutor(commandExecutor); 
         
@@ -57,7 +63,7 @@ public class PermissionsMain extends JavaPlugin {
     }
     
     public void registerPlayer(Player player) {
-        PermissionAttachment attachment = player.addAttachment();
+        PermissionAttachment attachment = player.addAttachment(this);
         permissions.put(player, attachment);
         
         for (String permission : calculatePlayerPermissions(player.getName())) {
@@ -130,6 +136,63 @@ public class PermissionsMain extends JavaPlugin {
         }
         
         return perms;
+    }
+
+    private void writeDefaultConfiguration() {
+        HashMap<String, Object> users = new HashMap<String, Object>();
+        HashMap<String, Object> user = new HashMap<String, Object>();
+        ArrayList<String> user_permissions = new ArrayList<String>();
+        ArrayList<String> user_groups = new ArrayList<String>();
+        
+        HashMap<String, Object> groups = new HashMap<String, Object>();
+        HashMap<String, Object> group_default = new HashMap<String, Object>();
+        ArrayList<String> group_default_permissions = new ArrayList<String>();
+        HashMap<String, Object> group_admin = new HashMap<String, Object>();
+        ArrayList<String> group_admin_inherits = new ArrayList<String>();
+        ArrayList<String> group_admin_permissions = new ArrayList<String>();
+        
+        user_permissions.add("permissions.example");
+        user_groups.add("admin");
+        user.put("permissions", user_permissions);
+        user.put("groups", user_groups);
+        users.put("ConspiracyWizard", user);
+        
+        group_default_permissions.add("permissions.build");
+        group_default.put("permissions", group_default_permissions);
+        group_admin_inherits.add("default");
+        group_admin_permissions.add("permissions.*");
+        group_admin.put("inherits", group_admin_inherits);
+        group_admin.put("permissions", group_admin_permissions);
+        groups.put("default", group_default);
+        groups.put("admin", group_admin);
+        
+        getConfiguration().setProperty("users", users);
+        getConfiguration().setProperty("groups", groups);
+        
+        getConfiguration().setHeader(
+            "# PermissionsBukkit configuration file",
+            "# ",
+            "# A permission node is a string like 'permissions.build', usually starting",
+            "# with the name of the plugin. Refer to a plugin's documentation for what",
+            "# permissions it cares about. Permission nodes may also be specified here",
+            "# starting with a minus (-), meaning the user or group will NOT have that",
+            "# permission. Some plugins provide permission nodes that map to a group of",
+            "# permissions - for example, PermissionsBukkit has 'permissions.*', which",
+            "# automatically grants all admin permissions.",
+            "# ",
+            "# Users inherit permissions from the groups they are a part of. If a user is",
+            "# not specified here, or does not have a 'groups' node, they will be in the",
+            "# group 'default'. Permissions for individual users may also be specified by",
+            "# using a 'permissions' node with a list of permission nodes, which will",
+            "# override their group permissions.",
+            "# ",
+            "# Groups can be assigned to players and all their permissions will also be",
+            "# assigned to those players. Groups can also inherit permissions from other",
+            "# groups. Like user permissions, groups may override the permissions of their",
+            "# parent group(s). Unlike users, groups do NOT automatically inherit from",
+            "# default."
+        );
+        getConfiguration().save();
     }
     
 }

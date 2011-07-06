@@ -8,6 +8,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permissible;
+import org.bukkit.permissions.Permission;
 import org.bukkit.util.config.ConfigurationNode;
 
 /**
@@ -42,10 +44,41 @@ class PermissionsCommand implements CommandExecutor {
             String node = split[2];
             
             if (player == null) {
-                sender.sendMessage(ChatColor.RED + "Player " + split[1] + " not found.");
+                sender.sendMessage(ChatColor.RED + "Player " + ChatColor.WHITE + split[1] + ChatColor.RED + " not found.");
             } else {
                 String has = player.hasPermission(node) ? ChatColor.AQUA + "has" : ChatColor.LIGHT_PURPLE + "does not have";
                 sender.sendMessage(ChatColor.GREEN + "Player " + player.getName() + " " + has + ChatColor.GREEN + " " + split[2]);
+            }
+            return true;
+        } else if (subcommand.equals("info")) {
+            if (!checkPerm(sender, "info")) return true;
+            if (split.length != 2) return usage(sender, command, subcommand);
+            
+            String node = split[1];
+            Permission perm = plugin.getServer().getPluginManager().getPermission(node);
+            
+            if (perm == null) {
+                sender.sendMessage(ChatColor.RED + "Permission " + ChatColor.WHITE + node + ChatColor.RED + " not found.");
+            } else {
+                sender.sendMessage(ChatColor.GREEN + "Info on permission " + ChatColor.WHITE + perm.getName() + ChatColor.GREEN + ":");
+                sender.sendMessage(ChatColor.GREEN + "Default: " + ChatColor.WHITE + perm.getDefault());
+                if (perm.getDescription() != null && perm.getDescription().length() > 0) {
+                    sender.sendMessage(ChatColor.GREEN + "Description: " + ChatColor.WHITE + perm.getDescription());
+                }
+                if (perm.getChildren() != null) {
+                    sender.sendMessage(ChatColor.GREEN + "Children: " + ChatColor.WHITE + perm.getChildren().size());
+                }
+            }
+            return true;
+        } else if (subcommand.equals("dump")) {
+            if (!checkPerm(sender, "dump")) return true;
+            if (split.length != 2) return usage(sender, command, subcommand);
+            
+            Player player = plugin.getServer().getPlayer(split[1]);
+            if (player == null) {
+                sender.sendMessage(ChatColor.RED + "Player " + ChatColor.WHITE + split[1] + ChatColor.RED + " not found.");
+            } else {
+                sender.sendMessage(ChatColor.RED + "Feature coming soon");
             }
             return true;
         } else if (subcommand.equals("group")) {

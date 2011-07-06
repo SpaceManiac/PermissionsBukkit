@@ -10,6 +10,8 @@ commands:
     usage: |
         /<command> reload - reload the configuration from disk.
         /<command> check <player> <node> - check if a player has a permission (any plugin).
+        /<command> info <node> - prints information on a specific permission.
+        /<command> dump <player> - prints all permissions a player has and info about them.
         /<command> group - list group-related commands.
         /<command> group list - list all groups.
         /<command> group players <group> - list players in a group.
@@ -23,13 +25,17 @@ commands:
         /<command> player removeperm <player> <node> - remove a permission from a player.
 permissions:
   permissions.*:
+    description: Container for all PermissionsBukkit administration nodes.
     children:
       permissions.help: true
       permissions.reload: true
       permissions.check: true
+      permissions.info: true
+      permissions.dump: true
       permissions.group.*: true
       permissions.player.*: true
   permissions.group.*:
+    description: Container for all group-related administration nodes.
     children:
       permissions.group.help: true
       permissions.group.list: true
@@ -38,6 +44,7 @@ permissions:
       permissions.group.addperm: true
       permissions.group.removeperm: true
   permissions.player.*:
+    description: Container for all player-related administration nodes.
     children:
       permissions.player.help: true
       permissions.player.groups: true
