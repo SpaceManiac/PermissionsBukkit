@@ -1,14 +1,19 @@
 package com.platymuus.bukkit.permissions;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.util.config.ConfigurationNode;
 
 /**
@@ -37,16 +42,23 @@ class PermissionsCommand implements CommandExecutor {
             return true;
         } if (subcommand.equals("check")) {
             if (!checkPerm(sender, "check")) return true;
-            if (split.length != 3) return usage(sender, command, subcommand);
+            if (split.length != 2 && split.length != 3) return usage(sender, command, subcommand);
             
-            Player player = plugin.getServer().getPlayer(split[1]);
-            String node = split[2];
+            String node = split[1];
+            Permissible permissible;
+            if (split.length == 2) {
+                permissible = sender;
+            } else {
+                permissible = plugin.getServer().getPlayer(split[1]);
+            }
             
-            if (player == null) {
+            String name = (permissible instanceof Player) ? ((Player) permissible).getName() : (permissible instanceof ConsoleCommandSender) ? "Console" : "Unknown";
+            
+            if (permissible == null) {
                 sender.sendMessage(ChatColor.RED + "Player " + ChatColor.WHITE + split[1] + ChatColor.RED + " not found.");
             } else {
-                String has = player.hasPermission(node) ? ChatColor.AQUA + "has" : ChatColor.LIGHT_PURPLE + "does not have";
-                sender.sendMessage(ChatColor.GREEN + "Player " + player.getName() + " " + has + ChatColor.GREEN + " " + split[2]);
+                String has = permissible.hasPermission(node) ? ChatColor.AQUA + "has" : ChatColor.LIGHT_PURPLE + "does not have";
+                sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + name + " " + has + ChatColor.GREEN + " " + split[2]);
             }
             return true;
         } else if (subcommand.equals("info")) {
@@ -71,13 +83,64 @@ class PermissionsCommand implements CommandExecutor {
             return true;
         } else if (subcommand.equals("dump")) {
             if (!checkPerm(sender, "dump")) return true;
-            if (split.length != 2) return usage(sender, command, subcommand);
+            if (split.length < 1 || split.length > 3) return usage(sender, command, subcommand);
             
-            Player player = plugin.getServer().getPlayer(split[1]);
-            if (player == null) {
-                sender.sendMessage(ChatColor.RED + "Player " + ChatColor.WHITE + split[1] + ChatColor.RED + " not found.");
+            int page;
+            Permissible permissible;
+            if (split.length == 1) {
+                permissible = sender;
+                page = 1;
+            } else if (split.length == 2) {
+                try {
+                    permissible = sender;
+                    page = Integer.parseInt(split[1]);
+                }
+                catch (NumberFormatException ex) {
+                    permissible = plugin.getServer().getPlayer(split[1]);
+                    page = 1;
+                }
             } else {
-                sender.sendMessage(ChatColor.RED + "Feature coming soon");
+                permissible = plugin.getServer().getPlayer(split[1]);
+                try {
+                    page = Integer.parseInt(split[2]);
+                }
+                catch (NumberFormatException ex) {
+                    page = 1;
+                }
+            }
+            
+            String name = (permissible instanceof Player) ? ((Player) permissible).getName() : (permissible instanceof ConsoleCommandSender) ? "Console" : "Unknown";
+            
+            if (permissible == null) {
+                sender.sendMessage(ChatColor.RED + "Player " + ChatColor.WHITE + name + ChatColor.RED + " not found.");
+            } else {
+                ArrayList<PermissionAttachmentInfo> dump = new ArrayList<PermissionAttachmentInfo>(permissible.getEffectivePermissions());
+                Collections.sort(dump, new Comparator<PermissionAttachmentInfo>() {
+                    public int compare(PermissionAttachmentInfo a, PermissionAttachmentInfo b) {
+                        return a.getPermission().compareTo(b.getPermission());
+                    }
+                });
+                
+                int numpages = 1 + (dump.size() - 1) / 8;
+                if (page > numpages) {
+                    page = numpages;
+                } else if (page < 1) {
+                    page = 1;
+                }
+                
+                ChatColor g = ChatColor.GREEN, w = ChatColor.WHITE, r = ChatColor.RED;
+                
+                int start = 8 * (page - 1);
+                sender.sendMessage(ChatColor.RED + "[==== " + ChatColor.GREEN + "Page " + page + " of " + numpages + ChatColor.RED + " ====]");
+                for (int i = start; i < start + 8 && i < dump.size(); ++i) {
+                    PermissionAttachmentInfo info = dump.get(i);
+                    
+                    if (info.getAttachment() == null) {
+                        sender.sendMessage(g + "Node " + w + info.getPermission() + g + "=" + w + info.getValue() + g + " (" + r + "default" + g + ")");
+                    } else {
+                        sender.sendMessage(g + "Node " + w + info.getPermission() + g + "=" + w + info.getValue() + g + " (" + w + info.getAttachment().getPlugin().getDescription().getName() + g + ")");
+                    }
+                }
             }
             return true;
         } else if (subcommand.equals("group")) {
@@ -320,14 +383,11 @@ class PermissionsCommand implements CommandExecutor {
     // -- utilities --
     
     private boolean checkPerm(CommandSender sender, String subnode) {
-        if (sender instanceof Player) {
-            boolean ok = ((Player) sender).hasPermission("permissions." + subnode);
-            if (!ok) {
-                sender.sendMessage(ChatColor.RED + "You do not have permissions to do that.");
-            }
-            return ok;
+        boolean ok = sender.hasPermission("permissions." + subnode);
+        if (!ok) {
+            sender.sendMessage(ChatColor.RED + "You do not have permissions to do that.");
         }
-        return true;
+        return ok;
     }
     
     private boolean usage(CommandSender sender, Command command) {

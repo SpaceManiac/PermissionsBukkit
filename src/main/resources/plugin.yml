@@ -9,9 +9,9 @@ commands:
     description: Commands for manipulating permissions.
     usage: |
         /<command> reload - reload the configuration from disk.
-        /<command> check <player> <node> - check if a player has a permission (any plugin).
+        /<command> check <node> [player] - check if a player or the sender has a permission (any plugin).
         /<command> info <node> - prints information on a specific permission.
-        /<command> dump <player> - prints all permissions a player has and info about them.
+        /<command> dump [player] [page] - prints info about a player's (or the sender's) permissions.
         /<command> group - list group-related commands.
         /<command> group list - list all groups.
         /<command> group players <group> - list players in a group.
