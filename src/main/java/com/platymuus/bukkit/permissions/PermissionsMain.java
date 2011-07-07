@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Priority;
@@ -65,14 +66,7 @@ public class PermissionsMain extends JavaPlugin {
     public void registerPlayer(Player player) {
         PermissionAttachment attachment = player.addAttachment(this);
         permissions.put(player, attachment);
-        
-        for (String permission : calculatePlayerPermissions(player.getName())) {
-            if (permission.startsWith("-")) {
-                attachment.setPermission(permission.substring(1), false);
-            } else {
-                attachment.setPermission(permission, true);
-            }
-        }
+        calculateAttachment(player);
     }
 
     public void unregisterPlayer(Player player) {
@@ -80,7 +74,7 @@ public class PermissionsMain extends JavaPlugin {
         permissions.remove(player);
     }
 
-    void refreshPermissions() {
+    public void refreshPermissions() {
         getConfiguration().save();
         for (Player player : permissions.keySet()) {
             PermissionAttachment attachment = permissions.get(player);
@@ -88,30 +82,36 @@ public class PermissionsMain extends JavaPlugin {
                 attachment.unsetPermission(key);
             }
             
-            for (String permission : calculatePlayerPermissions(player.getName())) {
-                if (permission.startsWith("-")) {
-                    attachment.setPermission(permission.substring(1), false);
-                } else {
-                    attachment.setPermission(permission, true);
-                }
-            }
-            
-            player.recalculatePermissions();
+            calculateAttachment(player);
         }
     }
     
-    private List<String> calculatePlayerPermissions(String player) {
+    private void calculateAttachment(Player player) {
+        PermissionAttachment attachment = permissions.get(player);
+            
+        for (Map.Entry<String, Object> entry : calculatePlayerPermissions(player.getName()).entrySet()) {
+            if (entry.getValue() != null && entry.getValue() instanceof Boolean) {
+                attachment.setPermission(entry.getKey(), (Boolean) entry.getValue());
+            } else {
+                getServer().getLogger().warning("[PermissionsBukkit] Node " + entry.getKey() + " for player " + player.getName() + " is non-Boolean");
+            }
+        }
+        
+        player.recalculatePermissions();
+    }
+    
+    private Map<String, Object> calculatePlayerPermissions(String player) {
         ConfigurationNode node = getConfiguration().getNode("users." + player);
         if (node == null) {
             return calculateGroupPermissions("default");
         }
         
-        List<String> perms = node.getStringList("permissions", new ArrayList<String>());
+        Map<String, Object> perms = node.getNode("permissions") == null ? new HashMap<String, Object>() : node.getNode("permissions").getAll();
         
         for (String group : node.getStringList("groups", new ArrayList<String>())) {
-            for (String permission : calculateGroupPermissions(group)) {
-                if (!perms.contains(permission)) {
-                    perms.add(permission);
+            for (Map.Entry<String, Object> entry : calculateGroupPermissions(group).entrySet()) {
+                if (!perms.containsKey(entry.getKey())) {
+                    perms.put(entry.getKey(), entry.getValue());
                 }
             }
         }
@@ -119,18 +119,18 @@ public class PermissionsMain extends JavaPlugin {
         return perms;
     }
     
-    private List<String> calculateGroupPermissions(String group) {
+    private Map<String, Object> calculateGroupPermissions(String group) {
         ConfigurationNode node = getConfiguration().getNode("groups." + group);
         if (node == null) {
-            return new ArrayList<String>();
+            return new HashMap<String, Object>();
         }
         
-        List<String> perms = node.getStringList("permissions", new ArrayList<String>());
+        Map<String, Object> perms = node.getNode("permissions") == null ? new HashMap<String, Object>() : node.getNode("permissions").getAll();
         
         for (String parent : node.getStringList("inherits", new ArrayList<String>())) {
-            for (String permission : calculateGroupPermissions(parent)) {
-                if (!perms.contains(permission)) {
-                    perms.add(permission);
+            for (Map.Entry<String, Object> entry : calculateGroupPermissions(parent).entrySet()) {
+                if (!perms.containsKey(entry.getKey())) {
+                    perms.put(entry.getKey(), entry.getValue());
                 }
             }
         }
@@ -141,29 +141,40 @@ public class PermissionsMain extends JavaPlugin {
     private void writeDefaultConfiguration() {
         HashMap<String, Object> users = new HashMap<String, Object>();
         HashMap<String, Object> user = new HashMap<String, Object>();
-        ArrayList<String> user_permissions = new ArrayList<String>();
+        HashMap<String, Object> user_permissions = new HashMap<String, Object>();
         ArrayList<String> user_groups = new ArrayList<String>();
         
         HashMap<String, Object> groups = new HashMap<String, Object>();
         HashMap<String, Object> group_default = new HashMap<String, Object>();
-        ArrayList<String> group_default_permissions = new ArrayList<String>();
+        HashMap<String, Object> group_default_permissions = new HashMap<String, Object>();
+        HashMap<String, Object> group_user = new HashMap<String, Object>();
+        ArrayList<String> group_user_inherits = new ArrayList<String>();
+        HashMap<String, Object> group_user_permissions = new HashMap<String, Object>();
         HashMap<String, Object> group_admin = new HashMap<String, Object>();
         ArrayList<String> group_admin_inherits = new ArrayList<String>();
-        ArrayList<String> group_admin_permissions = new ArrayList<String>();
+        HashMap<String, Object> group_admin_permissions = new HashMap<String, Object>();
         
-        user_permissions.add("permissions.example");
+        user_permissions.put("permissions.example", true);
         user_groups.add("admin");
         user.put("permissions", user_permissions);
         user.put("groups", user_groups);
         users.put("ConspiracyWizard", user);
         
-        group_default_permissions.add("permissions.build");
+        group_default_permissions.put("permissions.build", false);
         group_default.put("permissions", group_default_permissions);
-        group_admin_inherits.add("default");
-        group_admin_permissions.add("permissions.*");
+        
+        group_user_inherits.add("default");
+        group_user_permissions.put("permissions.build", true);
+        group_user.put("inherits", group_user_inherits);
+        group_user.put("permissions", group_user_permissions);
+        
+        group_admin_inherits.add("user");
+        group_admin_permissions.put("permissions.*", true);
         group_admin.put("inherits", group_admin_inherits);
         group_admin.put("permissions", group_admin_permissions);
+        
         groups.put("default", group_default);
+        groups.put("user", group_user);
         groups.put("admin", group_admin);
         
         getConfiguration().setProperty("users", users);
@@ -174,12 +185,12 @@ public class PermissionsMain extends JavaPlugin {
             "# ",
             "# A permission node is a string like 'permissions.build', usually starting",
             "# with the name of the plugin. Refer to a plugin's documentation for what",
-            "# permissions it cares about. Permission nodes may also be specified here",
-            "# starting with a minus (-), meaning the user or group will NOT have that",
-            "# permission. Some plugins provide permission nodes that map to a group of",
-            "# permissions - for example, PermissionsBukkit has 'permissions.*', which",
-            "# automatically grants all admin permissions.",
-            "# ",
+            "# permissions it cares about. Each node should be followed by true to grant",
+            "# that permission or false to revoke it, as in 'permissions.build: true'.",
+            "# Some plugins provide permission nodes that map to a group of permissions -",
+            "# for example, PermissionsBukkit has 'permissions.*', which automatically",
+            "# grants all admin permissions, but you can't specify false for permissions",
+            "# of this type.",
             "# Users inherit permissions from the groups they are a part of. If a user is",
             "# not specified here, or does not have a 'groups' node, they will be in the",
             "# group 'default'. Permissions for individual users may also be specified by",
@@ -190,7 +201,8 @@ public class PermissionsMain extends JavaPlugin {
             "# assigned to those players. Groups can also inherit permissions from other",
             "# groups. Like user permissions, groups may override the permissions of their",
             "# parent group(s). Unlike users, groups do NOT automatically inherit from",
-            "# default."
+            "# default.",
+            ""
         );
         getConfiguration().save();
     }

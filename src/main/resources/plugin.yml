@@ -25,7 +25,7 @@ commands:
         /<command> player removeperm <player> <node> - remove a permission from a player.
 permissions:
   permissions.*:
-    description: Container for all PermissionsBukkit administration nodes.
+    description: Allows use of all PermissionsBukkit administration commands.
     children:
       permissions.help: true
       permissions.reload: true
@@ -34,8 +34,21 @@ permissions:
       permissions.dump: true
       permissions.group.*: true
       permissions.player.*: true
+  permissions.build:
+    description: Allows player to build.
+    default: true
+  permissions.help:
+    description: Allows viewing of usage for /permissions.
+  permissions.reload:
+    description: Allows use of /permissions reload.
+  permissions.check:
+    description: Allows use of /permissions check.
+  permissions.info:
+    description: Allows use of /permissions info.
+  permissions.dump:
+    description: Allows use of /permissions dump.
   permissions.group.*:
-    description: Container for all group-related administration nodes.
+    description: Allows use of all /permissions group commands.
     children:
       permissions.group.help: true
       permissions.group.list: true
@@ -43,8 +56,20 @@ permissions:
       permissions.group.listparents: true
       permissions.group.addperm: true
       permissions.group.removeperm: true
+  permissions.group.help:
+    description: Allows viewing of usage for /permissions group.
+  permissions.group.list:
+    description: Allows use of /permissions group list.
+  permissions.group.players:
+    description: Allows use of /permissions group players.
+  permissions.group.listparents:
+    description: Allows use of /permissions group listparents.
+  permissions.group.addperm:
+    description: Allows use of /permissions group addperm.
+  permissions.group.removeperm:
+    description: Allows use of /permissions group removeperm.
   permissions.player.*:
-    description: Container for all player-related administration nodes.
+    description: Allows use of all /permissions player commands.
     children:
       permissions.player.help: true
       permissions.player.groups: true
@@ -52,3 +77,15 @@ permissions:
       permissions.player.removegroup: true
       permissions.player.addperm: true
       permissions.player.removeperm: true
+  permissions.player.help:
+    description: Allows viewing of usage for /permissions player.
+  permissions.player.groups:
+    description: Allows use of /permissions player groups.
+  permissions.player.addgroup:
+    description: Allows use of /permissions player addgroup.
+  permissions.player.removegroup:
+    description: Allows use of /permissions player removegroup.
+  permissions.player.addperm:
+    description: Allows use of /permissions player addperm.
+  permissions.player.removeperm:
+    description: Allows use of /permissions player removeperm.
