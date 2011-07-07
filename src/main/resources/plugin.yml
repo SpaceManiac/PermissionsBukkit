@@ -25,6 +25,7 @@ commands:
         /<command> player removeperm <player> <node> - remove a permission from a player.
 permissions:
   permissions.*:
+    default: op
     description: Allows use of all PermissionsBukkit administration commands.
     children:
       permissions.help: true

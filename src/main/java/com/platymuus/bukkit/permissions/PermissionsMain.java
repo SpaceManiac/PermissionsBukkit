@@ -189,7 +189,7 @@ public class PermissionsMain extends JavaPlugin {
             "# that permission or false to revoke it, as in 'permissions.build: true'.",
             "# Some plugins provide permission nodes that map to a group of permissions -",
             "# for example, PermissionsBukkit has 'permissions.*', which automatically",
-            "# grants all admin permissions, but you can't specify false for permissions",
+            "# grants all admin permissions. You can also specify false for permissions",
             "# of this type.",
             "# Users inherit permissions from the groups they are a part of. If a user is",
             "# not specified here, or does not have a 'groups' node, they will be in the",
