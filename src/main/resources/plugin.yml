@@ -15,14 +15,14 @@ commands:
         /<command> group - list group-related commands.
         /<command> group list - list all groups.
         /<command> group players <group> - list players in a group.
-        /<command> group addperm <group> <node> - add a permission to a group.
-        /<command> group removeperm <group> <node> - remove a permission from a group.
+        /<command> group setperm <group> <[world:]node> [true|false] - set a permission on a group.
+        /<command> group unsetperm <group> <[world:]node> - unset a permission on a group.
         /<command> player - list player-related commands.
         /<command> player groups <player> - list groups a player is in.
-        /<command> player addgroup <player> - add a player to a group.
-        /<command> player removegroup <player> - remove a player from a group.
-        /<command> player addperm <player> <node> - add a permission to a player.
-        /<command> player removeperm <player> <node> - remove a permission from a player.
+        /<command> player addgroup <player> <group> - add a player to a group.
+        /<command> player removegroup <player> <group> - remove a player from a group.
+        /<command> player setperm <player> <[world:]node> [true|false] - set a permission on a player.
+        /<command> player unsetperm <player> <[world:]node> - unset a permission on a player.
 permissions:
   permissions.*:
     default: op
@@ -54,21 +54,18 @@ permissions:
       permissions.group.help: true
       permissions.group.list: true
       permissions.group.players: true
-      permissions.group.listparents: true
-      permissions.group.addperm: true
-      permissions.group.removeperm: true
+      permissions.group.setperm: true
+      permissions.group.unsetperm: true
   permissions.group.help:
     description: Allows viewing of usage for /permissions group.
   permissions.group.list:
     description: Allows use of /permissions group list.
   permissions.group.players:
     description: Allows use of /permissions group players.
-  permissions.group.listparents:
-    description: Allows use of /permissions group listparents.
-  permissions.group.addperm:
-    description: Allows use of /permissions group addperm.
-  permissions.group.removeperm:
-    description: Allows use of /permissions group removeperm.
+  permissions.group.setperm:
+    description: Allows use of /permissions group setperm.
+  permissions.group.unsetperm:
+    description: Allows use of /permissions group unsetperm.
   permissions.player.*:
     description: Allows use of all /permissions player commands.
     children:
@@ -76,8 +73,8 @@ permissions:
       permissions.player.groups: true
       permissions.player.addgroup: true
       permissions.player.removegroup: true
-      permissions.player.addperm: true
-      permissions.player.removeperm: true
+      permissions.player.setperm: true
+      permissions.player.unsetperm: true
   permissions.player.help:
     description: Allows viewing of usage for /permissions player.
   permissions.player.groups:
@@ -86,7 +83,7 @@ permissions:
     description: Allows use of /permissions player addgroup.
   permissions.player.removegroup:
     description: Allows use of /permissions player removegroup.
-  permissions.player.addperm:
-    description: Allows use of /permissions player addperm.
-  permissions.player.removeperm:
-    description: Allows use of /permissions player removeperm.
+  permissions.player.setperm:
+    description: Allows use of /permissions player setperm.
+  permissions.player.unsetperm:
+    description: Allows use of /permissions player unsetperm.

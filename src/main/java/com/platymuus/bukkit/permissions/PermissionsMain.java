@@ -29,6 +29,7 @@ public class PermissionsMain extends JavaPlugin {
     public void onEnable() {
         // Write some default configuration
         if (!new File(getDataFolder(), "config.yml").exists()) {
+            getServer().getLogger().info("Generating default configuration");
             writeDefaultConfiguration();
         }
         
@@ -89,7 +90,7 @@ public class PermissionsMain extends JavaPlugin {
     private void calculateAttachment(Player player) {
         PermissionAttachment attachment = permissions.get(player);
             
-        for (Map.Entry<String, Object> entry : calculatePlayerPermissions(player.getName(), player.getWorld().getName()).entrySet()) {
+        for (Map.Entry<String, Object> entry : calculatePlayerPermissions(player.getName().toLowerCase(), player.getWorld().getName()).entrySet()) {
             if (entry.getValue() != null && entry.getValue() instanceof Boolean) {
                 attachment.setPermission(entry.getKey(), (Boolean) entry.getValue());
             } else {
