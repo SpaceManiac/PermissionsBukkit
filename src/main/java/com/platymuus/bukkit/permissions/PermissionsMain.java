@@ -87,6 +87,33 @@ public class PermissionsMain extends JavaPlugin {
         }
     }
     
+    public ConfigurationNode getNode(String child) {
+        return getNode("", child);
+    }
+    
+    private ConfigurationNode getNode(String parent, String child) {
+        ConfigurationNode parentNode = null;
+        if (parent.length() == 0) {
+            parentNode = getConfiguration();
+        } else if (parent.contains(".")) {
+            int index = parent.indexOf('.');
+            parentNode = getNode(parent.substring(0, index), parent.substring(index + 1));
+        } else {
+            parentNode = getNode("", parent);
+        }
+        
+        if (parentNode == null) {
+            return null;
+        }
+        
+        for (String entry : parentNode.getKeys()) {
+            if (child.equalsIgnoreCase(entry)) {
+                return parentNode.getNode(entry);
+            }
+        }
+        return null;
+    }
+    
     private void calculateAttachment(Player player) {
         PermissionAttachment attachment = permissions.get(player);
             
@@ -102,21 +129,20 @@ public class PermissionsMain extends JavaPlugin {
     }
     
     private Map<String, Object> calculatePlayerPermissions(String player, String world) {
-        ConfigurationNode node = getConfiguration().getNode("users." + player);
-        if (node == null) {
+        if (getNode("users." + player) == null) {
             return calculateGroupPermissions("default", world);
         }
         
-        Map<String, Object> perms = node.getNode("permissions") == null ? new HashMap<String, Object>() : node.getNode("permissions").getAll();
+        Map<String, Object> perms = getNode("users." + player + ".permissions") == null ? new HashMap<String, Object>() : getNode("users." + player + ".permissions").getAll();
         
-        if (node.getNode("worlds." + world) != null) {
-            for (Map.Entry<String, Object> entry : node.getNode("worlds." + world).getAll().entrySet()) {
+        if (getNode("users." + player + ".worlds." + world) != null) {
+            for (Map.Entry<String, Object> entry : getNode("users." + player + ".worlds." + world).getAll().entrySet()) {
                 // No containskey; world overrides non-world
                 perms.put(entry.getKey(), entry.getValue());
             }
         }
         
-        for (String group : node.getStringList("groups", new ArrayList<String>())) {
+        for (String group : getNode("users." + player).getStringList("groups", new ArrayList<String>())) {
             for (Map.Entry<String, Object> entry : calculateGroupPermissions(group, world).entrySet()) {
                 if (!perms.containsKey(entry.getKey())) { // User overrides group
                     perms.put(entry.getKey(), entry.getValue());
@@ -128,21 +154,20 @@ public class PermissionsMain extends JavaPlugin {
     }
     
     private Map<String, Object> calculateGroupPermissions(String group, String world) {
-        ConfigurationNode node = getConfiguration().getNode("groups." + group);
-        if (node == null) {
+        if (getNode("groups." + group) == null) {
             return new HashMap<String, Object>();
         }
         
-        Map<String, Object> perms = node.getNode("permissions") == null ? new HashMap<String, Object>() : node.getNode("permissions").getAll();
+        Map<String, Object> perms = getNode("groups." + group + ".permissions") == null ? new HashMap<String, Object>() : getNode("groups." + group + ".permissions").getAll();
         
-        if (node.getNode("worlds." + world) != null) {
-            for (Map.Entry<String, Object> entry : node.getNode("worlds." + world).getAll().entrySet()) {
+        if (getNode("groups." + group + ".worlds." + world) != null) {
+            for (Map.Entry<String, Object> entry : getNode("groups." + group + ".worlds." + world).getAll().entrySet()) {
                 // No containskey; world overrides non-world
                 perms.put(entry.getKey(), entry.getValue());
             }
         }
         
-        for (String parent : node.getStringList("inherits", new ArrayList<String>())) {
+        for (String parent : getNode("groups." + group).getStringList("inheritance", new ArrayList<String>())) {
             for (Map.Entry<String, Object> entry : calculateGroupPermissions(parent, world).entrySet()) {
                 if (!perms.containsKey(entry.getKey())) { // Children override permissions
                     perms.put(entry.getKey(), entry.getValue());
@@ -186,13 +211,13 @@ public class PermissionsMain extends JavaPlugin {
         group_user_permissions.put("permissions.build", true);
         group_user_worlds_creative.put("coolplugin.item", true);
         group_user_worlds.put("creative", group_user_worlds_creative);
-        group_user.put("inherits", group_user_inherits);
+        group_user.put("inheritance", group_user_inherits);
         group_user.put("permissions", group_user_permissions);
         group_user.put("worlds", group_user_worlds);
         
         group_admin_inherits.add("user");
         group_admin_permissions.put("permissions.*", true);
-        group_admin.put("inherits", group_admin_inherits);
+        group_admin.put("inheritance", group_admin_inherits);
         group_admin.put("permissions", group_admin_permissions);
         
         groups.put("default", group_default);

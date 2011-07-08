@@ -165,16 +165,14 @@ class PermissionsCommand implements CommandExecutor {
     }
 
     private boolean groupCommand(CommandSender sender, Command command, String[] split) {
-        ConfigurationNode groupNode = plugin.getConfiguration().getNode("groups");
-        ConfigurationNode userNode = plugin.getConfiguration().getNode("users");
-        
         String subcommand = split[1];
+        
         if (subcommand.equals("list")) {
             if (!checkPerm(sender, "group.list")) return true;
             if (split.length != 2) return usage(sender, command, "group list");
             
             String result = "", sep = "";
-            for (String key : groupNode.getKeys()) {
+            for (String key : plugin.getNode("groups").getKeys()) {
                 result += sep + key;
                 sep = ", ";
             }
@@ -185,15 +183,15 @@ class PermissionsCommand implements CommandExecutor {
             if (split.length != 3) return usage(sender, command, "group players");
             String group = split[2];
             
-            if (groupNode.getNode(group) == null) {
+            if (plugin.getNode("groups." + group) == null) {
                 sender.sendMessage(ChatColor.RED + "No such group " + ChatColor.WHITE + group + ChatColor.RED + ".");
                 return true;
             }
             
             int count = 0;
             String text = "", sep = "";
-            for (String user : userNode.getKeys()) {
-                if (userNode.getStringList(user + ".groups", new ArrayList<String>()).contains(group)) {
+            for (String user : plugin.getNode("users").getKeys()) {
+                if (plugin.getNode("users." + user).getStringList("groups", new ArrayList<String>()).contains(group)) {
                     ++count;
                     text += sep + user;
                     sep = ", ";
@@ -209,7 +207,7 @@ class PermissionsCommand implements CommandExecutor {
             boolean value = (split.length == 5) ? Boolean.parseBoolean(split[4]) : true;
             
             String node = "permissions";
-            if (groupNode.getNode(group) == null) {
+            if (plugin.getNode("groups." + group) == null) {
                 sender.sendMessage(ChatColor.RED + "No such group " + ChatColor.WHITE + group + ChatColor.RED + ".");
                 return true;
             }
@@ -219,13 +217,13 @@ class PermissionsCommand implements CommandExecutor {
                 perm = perm.substring(perm.indexOf(':') + 1);
                 node = "worlds." + world;
             }
-            if (groupNode.getNode(group + "." + node) == null) {
+            if (plugin.getNode("groups." + group + "." + node) == null) {
                 createGroupNode(group, node);
             }
             
-            Map<String, Object> list = groupNode.getNode(group + "." + node).getAll();
+            Map<String, Object> list = plugin.getNode("groups." + group + "." + node).getAll();
             list.put(perm, value);
-            groupNode.getNode(group).setProperty(node, list);
+            plugin.getNode("groups." + group).setProperty(node, list);
             
             plugin.refreshPermissions();
             
@@ -234,11 +232,11 @@ class PermissionsCommand implements CommandExecutor {
         } else if (subcommand.equals("unsetperm")) {
             if (!checkPerm(sender, "group.unsetperm")) return true;
             if (split.length != 4) return usage(sender, command, "group unsetperm");
-            String group = split[2];
+            String group = split[2].toLowerCase();
             String perm = split[3];
             
             String node = "permissions";
-            if (groupNode.getNode(group) == null) {
+            if (plugin.getNode("groups." + group) == null) {
                 sender.sendMessage(ChatColor.RED + "No such group " + ChatColor.WHITE + group + ChatColor.RED + ".");
                 return true;
             }
@@ -248,17 +246,17 @@ class PermissionsCommand implements CommandExecutor {
                 perm = perm.substring(perm.indexOf(':') + 1);
                 node = "worlds." + world;
             }
-            if (groupNode.getNode(group + "." + node) == null) {
+            if (plugin.getNode("groups." + group + "." + node) == null) {
                 createGroupNode(group, node);
             }
             
-            Map<String, Object> list = groupNode.getNode(group + "." + node).getAll();
+            Map<String, Object> list = plugin.getNode("groups." + group + "." + node).getAll();
             if (!list.containsKey(perm)) {
                 sender.sendMessage(ChatColor.GREEN + "Group " + ChatColor.WHITE + group + ChatColor.GREEN + " did not have " + ChatColor.WHITE + perm + ChatColor.GREEN + " set.");
                 return true;
             }
             list.remove(perm);
-            groupNode.getNode(group).setProperty(node, list);
+            plugin.getNode("groups." + group).setProperty(node, list);
             
             plugin.refreshPermissions();
             
@@ -271,23 +269,21 @@ class PermissionsCommand implements CommandExecutor {
     }
 
     private boolean playerCommand(CommandSender sender, Command command, String[] split) {
-        ConfigurationNode groupNode = plugin.getConfiguration().getNode("groups");
-        ConfigurationNode userNode = plugin.getConfiguration().getNode("users");
-        
         String subcommand = split[1];
+        
         if (subcommand.equals("groups")) {
             if (!checkPerm(sender, "player.groups")) return true;
             if (split.length != 3) return usage(sender, command, "player groups");
             String player = split[2].toLowerCase();
             
-            if (userNode.getNode(player) == null) {
+            if (plugin.getNode("users." + player) == null) {
                 sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + player + ChatColor.RED + " is in the default group.");
                 return true;
             }
             
             int count = 0;
             String text = "", sep = "";
-            for (String group : userNode.getNode(player).getStringList("groups", new ArrayList<String>())) {
+            for (String group : plugin.getNode("users." + player).getStringList("groups", new ArrayList<String>())) {
                 ++count;
                 text += sep + group;
                 sep = ", ";
@@ -300,17 +296,17 @@ class PermissionsCommand implements CommandExecutor {
             String player = split[2].toLowerCase();
             String group = split[3];
             
-            if (userNode.getNode(player) == null) {
+            if (plugin.getNode("users." + player) == null) {
                 createPlayerNode(player);
             }
             
-            List<String> list = userNode.getNode(player).getStringList("groups", new ArrayList<String>());
+            List<String> list = plugin.getNode("users." + player).getStringList("groups", new ArrayList<String>());
             if (list.contains(group)) {
                 sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + player + ChatColor.GREEN + " was already in " + ChatColor.WHITE + group + ChatColor.GREEN + ".");
                 return true;
             }
             list.add(group);
-            userNode.getNode(player).setProperty("groups", list);
+            plugin.getNode("users." + player).setProperty("groups", list);
             
             plugin.refreshPermissions();
             
@@ -322,17 +318,17 @@ class PermissionsCommand implements CommandExecutor {
             String player = split[2].toLowerCase();
             String group = split[3];
             
-            if (userNode.getNode(player) == null) {
+            if (plugin.getNode("users." + player) == null) {
                 createPlayerNode(player);
             }
             
-            List<String> list = userNode.getNode(player).getStringList("groups", new ArrayList<String>());
+            List<String> list = plugin.getNode("users." + player).getStringList("groups", new ArrayList<String>());
             if (!list.contains(group)) {
                 sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + player + ChatColor.GREEN + " was not in " + ChatColor.WHITE + group + ChatColor.GREEN + ".");
                 return true;
             }
             list.remove(group);
-            userNode.getNode(player).setProperty("groups", list);
+            plugin.getNode("users." + player).setProperty("groups", list);
             
             plugin.refreshPermissions();
             
@@ -346,7 +342,7 @@ class PermissionsCommand implements CommandExecutor {
             boolean value = (split.length == 5) ? Boolean.parseBoolean(split[4]) : true;
             
             String node = "permissions";
-            if (userNode.getNode(player) == null) {
+            if (plugin.getNode("users." + player) == null) {
                 createPlayerNode(player);
             }
             
@@ -355,13 +351,13 @@ class PermissionsCommand implements CommandExecutor {
                 perm = perm.substring(perm.indexOf(':') + 1);
                 node = "worlds." + world;
             }
-            if (userNode.getNode(player + "." + node) == null) {
+            if (plugin.getNode("users." + player + "." + node) == null) {
                 createPlayerNode(player, node);
             }
             
-            Map<String, Object> list = userNode.getNode(player + "." + node).getAll();
+            Map<String, Object> list = plugin.getNode("users." + player + "." + node).getAll();
             list.put(perm, value);
-            userNode.getNode(player).setProperty(node, list);
+            plugin.getNode("users." + player).setProperty(node, list);
             
             plugin.refreshPermissions();
             
@@ -374,7 +370,7 @@ class PermissionsCommand implements CommandExecutor {
             String perm = split[3];
             
             String node = "permissions";
-            if (userNode.getNode(player) == null) {
+            if (plugin.getNode("users." + player) == null) {
                 createPlayerNode(player);
             }
             
@@ -383,17 +379,17 @@ class PermissionsCommand implements CommandExecutor {
                 perm = perm.substring(perm.indexOf(':') + 1);
                 node = "worlds." + world;
             }
-            if (userNode.getNode(player + "." + node) == null) {
+            if (plugin.getNode("users." + player + "." + node) == null) {
                 createPlayerNode(player, node);
             }
             
-            Map<String, Object> list = userNode.getNode(player + "." + node).getAll();
+            Map<String, Object> list = plugin.getNode("users." + player + "." + node).getAll();
             if (!list.containsKey(perm)) {
                 sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + player + ChatColor.GREEN + " did not have " + ChatColor.WHITE + perm + ChatColor.GREEN + " set.");
                 return true;
             }
             list.remove(perm);
-            userNode.getNode(player).setProperty(node, list);
+            plugin.getNode("users." + player).setProperty(node, list);
             
             plugin.refreshPermissions();
             
@@ -410,17 +406,17 @@ class PermissionsCommand implements CommandExecutor {
         groups.add("default");
         HashMap<String, Object> user = new HashMap<String, Object>();
         user.put("groups", groups);
-        plugin.getConfiguration().getNode("users").setProperty(player, user);
+        plugin.getNode("users").setProperty(player, user);
     }
 
     private void createPlayerNode(String player, String subnode) {
         HashMap<String, Object> empty = new HashMap<String, Object>();
-        plugin.getConfiguration().getNode("users." + player).setProperty(subnode, empty);
+        plugin.getNode("users." + player).setProperty(subnode, empty);
     }
 
     private void createGroupNode(String group, String subnode) {
         HashMap<String, Object> empty = new HashMap<String, Object>();
-        plugin.getConfiguration().getNode("groups." + group).setProperty(subnode, empty);
+        plugin.getNode("groups." + group).setProperty(subnode, empty);
     }
     
     // -- utilities --
