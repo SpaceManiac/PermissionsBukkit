@@ -89,7 +89,7 @@ public class PermissionsMain extends JavaPlugin {
     private void calculateAttachment(Player player) {
         PermissionAttachment attachment = permissions.get(player);
             
-        for (Map.Entry<String, Object> entry : calculatePlayerPermissions(player.getName()).entrySet()) {
+        for (Map.Entry<String, Object> entry : calculatePlayerPermissions(player.getName(), player.getWorld().getName()).entrySet()) {
             if (entry.getValue() != null && entry.getValue() instanceof Boolean) {
                 attachment.setPermission(entry.getKey(), (Boolean) entry.getValue());
             } else {
@@ -100,17 +100,24 @@ public class PermissionsMain extends JavaPlugin {
         player.recalculatePermissions();
     }
     
-    private Map<String, Object> calculatePlayerPermissions(String player) {
+    private Map<String, Object> calculatePlayerPermissions(String player, String world) {
         ConfigurationNode node = getConfiguration().getNode("users." + player);
         if (node == null) {
-            return calculateGroupPermissions("default");
+            return calculateGroupPermissions("default", world);
         }
         
         Map<String, Object> perms = node.getNode("permissions") == null ? new HashMap<String, Object>() : node.getNode("permissions").getAll();
         
+        if (node.getNode("worlds." + world) != null) {
+            for (Map.Entry<String, Object> entry : node.getNode("worlds." + world).getAll().entrySet()) {
+                // No containskey; world overrides non-world
+                perms.put(entry.getKey(), entry.getValue());
+            }
+        }
+        
         for (String group : node.getStringList("groups", new ArrayList<String>())) {
-            for (Map.Entry<String, Object> entry : calculateGroupPermissions(group).entrySet()) {
-                if (!perms.containsKey(entry.getKey())) {
+            for (Map.Entry<String, Object> entry : calculateGroupPermissions(group, world).entrySet()) {
+                if (!perms.containsKey(entry.getKey())) { // User overrides group
                     perms.put(entry.getKey(), entry.getValue());
                 }
             }
@@ -119,7 +126,7 @@ public class PermissionsMain extends JavaPlugin {
         return perms;
     }
     
-    private Map<String, Object> calculateGroupPermissions(String group) {
+    private Map<String, Object> calculateGroupPermissions(String group, String world) {
         ConfigurationNode node = getConfiguration().getNode("groups." + group);
         if (node == null) {
             return new HashMap<String, Object>();
@@ -127,9 +134,16 @@ public class PermissionsMain extends JavaPlugin {
         
         Map<String, Object> perms = node.getNode("permissions") == null ? new HashMap<String, Object>() : node.getNode("permissions").getAll();
         
+        if (node.getNode("worlds." + world) != null) {
+            for (Map.Entry<String, Object> entry : node.getNode("worlds." + world).getAll().entrySet()) {
+                // No containskey; world overrides non-world
+                perms.put(entry.getKey(), entry.getValue());
+            }
+        }
+        
         for (String parent : node.getStringList("inherits", new ArrayList<String>())) {
-            for (Map.Entry<String, Object> entry : calculateGroupPermissions(parent).entrySet()) {
-                if (!perms.containsKey(entry.getKey())) {
+            for (Map.Entry<String, Object> entry : calculateGroupPermissions(parent, world).entrySet()) {
+                if (!perms.containsKey(entry.getKey())) { // Children override permissions
                     perms.put(entry.getKey(), entry.getValue());
                 }
             }
@@ -147,9 +161,13 @@ public class PermissionsMain extends JavaPlugin {
         HashMap<String, Object> groups = new HashMap<String, Object>();
         HashMap<String, Object> group_default = new HashMap<String, Object>();
         HashMap<String, Object> group_default_permissions = new HashMap<String, Object>();
+        
         HashMap<String, Object> group_user = new HashMap<String, Object>();
         ArrayList<String> group_user_inherits = new ArrayList<String>();
         HashMap<String, Object> group_user_permissions = new HashMap<String, Object>();
+        HashMap<String, Object> group_user_worlds = new HashMap<String, Object>();
+        HashMap<String, Object> group_user_worlds_creative = new HashMap<String, Object>();
+        
         HashMap<String, Object> group_admin = new HashMap<String, Object>();
         ArrayList<String> group_admin_inherits = new ArrayList<String>();
         HashMap<String, Object> group_admin_permissions = new HashMap<String, Object>();
@@ -165,8 +183,11 @@ public class PermissionsMain extends JavaPlugin {
         
         group_user_inherits.add("default");
         group_user_permissions.put("permissions.build", true);
+        group_user_worlds_creative.put("coolplugin.item", true);
+        group_user_worlds.put("creative", group_user_worlds_creative);
         group_user.put("inherits", group_user_inherits);
         group_user.put("permissions", group_user_permissions);
+        group_user.put("worlds", group_user_worlds);
         
         group_admin_inherits.add("user");
         group_admin_permissions.put("permissions.*", true);
@@ -191,17 +212,19 @@ public class PermissionsMain extends JavaPlugin {
             "# for example, PermissionsBukkit has 'permissions.*', which automatically",
             "# grants all admin permissions. You can also specify false for permissions",
             "# of this type.",
+            "# ",
             "# Users inherit permissions from the groups they are a part of. If a user is",
             "# not specified here, or does not have a 'groups' node, they will be in the",
             "# group 'default'. Permissions for individual users may also be specified by",
             "# using a 'permissions' node with a list of permission nodes, which will",
-            "# override their group permissions.",
+            "# override their group permissions. World permissions may be assigned to",
+            "# users with a 'worlds:' entry.",
             "# ",
             "# Groups can be assigned to players and all their permissions will also be",
             "# assigned to those players. Groups can also inherit permissions from other",
             "# groups. Like user permissions, groups may override the permissions of their",
             "# parent group(s). Unlike users, groups do NOT automatically inherit from",
-            "# default.",
+            "# default. World permissions may be assigned to groups with a 'worlds:' entry.",
             ""
         );
         getConfiguration().save();

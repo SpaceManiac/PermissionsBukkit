@@ -49,16 +49,16 @@ class PermissionsCommand implements CommandExecutor {
             if (split.length == 2) {
                 permissible = sender;
             } else {
-                permissible = plugin.getServer().getPlayer(split[1]);
+                permissible = plugin.getServer().getPlayer(split[2]);
             }
             
             String name = (permissible instanceof Player) ? ((Player) permissible).getName() : (permissible instanceof ConsoleCommandSender) ? "Console" : "Unknown";
             
             if (permissible == null) {
-                sender.sendMessage(ChatColor.RED + "Player " + ChatColor.WHITE + split[1] + ChatColor.RED + " not found.");
+                sender.sendMessage(ChatColor.RED + "Player " + ChatColor.WHITE + split[2] + ChatColor.RED + " not found.");
             } else {
                 String has = permissible.hasPermission(node) ? ChatColor.AQUA + "has" : ChatColor.LIGHT_PURPLE + "does not have";
-                sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + name + " " + has + ChatColor.GREEN + " " + split[2]);
+                sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + name + " " + has + ChatColor.GREEN + " " + node);
             }
             return true;
         } else if (subcommand.equals("info")) {
