@@ -11,19 +11,19 @@ import org.bukkit.util.config.ConfigurationNode;
  * A class representing a permissions group.
  */
 public class Group {
-    
+
     private PermissionsPlugin plugin;
     private String name;
-    
+
     protected Group(PermissionsPlugin plugin, String name) {
         this.plugin = plugin;
         this.name = name;
     }
-    
+
     public String getName() {
         return name;
     }
-    
+
     public List<String> getPlayers() {
         ArrayList<String> result = new ArrayList<String>();
         if (plugin.getNode("users") != null) {
@@ -37,7 +37,7 @@ public class Group {
         }
         return result;
     }
-    
+
     public List<Player> getOnlinePlayers() {
         ArrayList<Player> result = new ArrayList<Player>();
         for (String user : getPlayers()) {
@@ -48,7 +48,7 @@ public class Group {
         }
         return result;
     }
-    
+
     public PermissionInfo getInfo() {
         ConfigurationNode node = plugin.getNode("groups." + name);
         if (node == null) {
@@ -56,14 +56,15 @@ public class Group {
         }
         return new PermissionInfo(plugin, node, "inheritance");
     }
-    
+
     @Override
     public boolean equals(Object o) {
-        if (o == null || !(o instanceof Group))
+        if (o == null || !(o instanceof Group)) {
             return false;
+        }
         return name.equalsIgnoreCase(((Group) o).getName());
     }
-    
+
     @Override
     public String toString() {
         return "Group{name=" + name + "}";
@@ -73,5 +74,5 @@ public class Group {
     public int hashCode() {
         return name.hashCode();
     }
-    
+
 }

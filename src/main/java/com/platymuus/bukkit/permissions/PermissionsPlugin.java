@@ -23,9 +23,8 @@ public class PermissionsPlugin extends JavaPlugin {
     private PlayerListener playerListener = new PlayerListener(this);
     private PermissionsCommand commandExecutor = new PermissionsCommand(this);
     private HashMap<Player, PermissionAttachment> permissions = new HashMap<Player, PermissionAttachment>();
-    
-    // -- Basic stuff
 
+    // -- Basic stuff
     @Override
     public void onEnable() {
         // Write some default configuration
@@ -64,9 +63,8 @@ public class PermissionsPlugin extends JavaPlugin {
         // Good day to you! I said good day!
         getServer().getLogger().info(getDescription().getFullName() + " is now disabled");
     }
-    
+
     // -- External API
-    
     /**
      * Get the group with the given name.
      * @param groupName The name of the group.
@@ -82,7 +80,7 @@ public class PermissionsPlugin extends JavaPlugin {
         }
         return null;
     }
-    
+
     /**
      * Returns a list of groups a player is in.
      * @param playerName The name of the player.
@@ -99,7 +97,7 @@ public class PermissionsPlugin extends JavaPlugin {
         }
         return result;
     }
-    
+
     /**
      * Returns permission info on the given player.
      * @param playerName The name of the player.
@@ -112,7 +110,7 @@ public class PermissionsPlugin extends JavaPlugin {
             return new PermissionInfo(this, getNode("users." + playerName), "groups");
         }
     }
-    
+
     /**
      * Returns a list of all defined groups.
      * @return The list of groups.
@@ -126,9 +124,8 @@ public class PermissionsPlugin extends JavaPlugin {
         }
         return result;
     }
-    
-    // -- Plugin stuff
 
+    // -- Plugin stuff
     protected void registerPlayer(Player player) {
         PermissionAttachment attachment = player.addAttachment(this);
         permissions.put(player, attachment);
@@ -155,9 +152,8 @@ public class PermissionsPlugin extends JavaPlugin {
     protected ConfigurationNode getNode(String child) {
         return getNode("", child);
     }
-    
-    // -- Private stuff
 
+    // -- Private stuff
     private ConfigurationNode getNode(String parent, String child) {
         ConfigurationNode parentNode = null;
         if (parent.length() == 0) {
@@ -256,13 +252,13 @@ public class PermissionsPlugin extends JavaPlugin {
         HashMap<String, Object> group_default_permissions = new HashMap<String, Object>();
 
         HashMap<String, Object> group_user = new HashMap<String, Object>();
-        ArrayList<String> group_user_inherits = new ArrayList<String>();
+        ArrayList<String> group_user_inheritance = new ArrayList<String>();
         HashMap<String, Object> group_user_permissions = new HashMap<String, Object>();
         HashMap<String, Object> group_user_worlds = new HashMap<String, Object>();
         HashMap<String, Object> group_user_worlds_creative = new HashMap<String, Object>();
 
         HashMap<String, Object> group_admin = new HashMap<String, Object>();
-        ArrayList<String> group_admin_inherits = new ArrayList<String>();
+        ArrayList<String> group_admin_inheritance = new ArrayList<String>();
         HashMap<String, Object> group_admin_permissions = new HashMap<String, Object>();
 
         user_permissions.put("permissions.example", true);
@@ -274,17 +270,17 @@ public class PermissionsPlugin extends JavaPlugin {
         group_default_permissions.put("permissions.build", false);
         group_default.put("permissions", group_default_permissions);
 
-        group_user_inherits.add("default");
+        group_user_inheritance.add("default");
         group_user_permissions.put("permissions.build", true);
         group_user_worlds_creative.put("coolplugin.item", true);
         group_user_worlds.put("creative", group_user_worlds_creative);
-        group_user.put("inheritance", group_user_inherits);
+        group_user.put("inheritance", group_user_inheritance);
         group_user.put("permissions", group_user_permissions);
         group_user.put("worlds", group_user_worlds);
 
-        group_admin_inherits.add("user");
+        group_admin_inheritance.add("user");
         group_admin_permissions.put("permissions.*", true);
-        group_admin.put("inheritance", group_admin_inherits);
+        group_admin.put("inheritance", group_admin_inheritance);
         group_admin.put("permissions", group_admin_permissions);
 
         groups.put("default", group_default);
@@ -321,4 +317,5 @@ public class PermissionsPlugin extends JavaPlugin {
             "");
         getConfiguration().save();
     }
+
 }

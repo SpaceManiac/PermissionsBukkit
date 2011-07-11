@@ -1,5 +1,5 @@
 name: PermissionsBukkit
-main: com.platymuus.bukkit.permissions.PermissionsMain
+main: com.platymuus.bukkit.permissions.PermissionsPlugin
 author: The Bukkit Team
 website: http://bukkit.org
 version: 1.0

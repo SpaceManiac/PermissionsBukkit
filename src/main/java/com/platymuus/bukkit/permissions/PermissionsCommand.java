@@ -15,7 +15,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachmentInfo;
-import org.bukkit.util.config.ConfigurationNode;
 
 /**
  * CommandExecutor for /permissions
