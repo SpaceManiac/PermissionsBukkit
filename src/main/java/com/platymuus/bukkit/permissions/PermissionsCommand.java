@@ -22,9 +22,9 @@ import org.bukkit.util.config.ConfigurationNode;
  */
 class PermissionsCommand implements CommandExecutor {
     
-    private PermissionsMain plugin;
+    private PermissionsPlugin plugin;
 
-    public PermissionsCommand(PermissionsMain plugin) {
+    public PermissionsCommand(PermissionsPlugin plugin) {
         this.plugin = plugin;
     }
 
