@@ -154,9 +154,14 @@ public class PermissionsPlugin extends JavaPlugin {
     }
 
     // -- Private stuff
+    
     private ConfigurationNode getNode(String parent, String child) {
         ConfigurationNode parentNode = null;
-        if (parent.length() == 0) {
+        if (child.contains(".")) {
+            int index = child.lastIndexOf('.');
+            parentNode = getNode("", child.substring(0, index));
+            child = child.substring(index + 1);
+        } else if (parent.length() == 0) {
             parentNode = getConfiguration();
         } else if (parent.contains(".")) {
             int index = parent.indexOf('.');
