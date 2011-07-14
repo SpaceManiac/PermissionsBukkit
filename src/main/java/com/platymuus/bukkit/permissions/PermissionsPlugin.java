@@ -38,9 +38,9 @@ public class PermissionsPlugin extends JavaPlugin {
 
         // Events
         PluginManager pm = getServer().getPluginManager();
-        pm.registerEvent(Type.PLAYER_JOIN, playerListener, Priority.Normal, this);
-        pm.registerEvent(Type.PLAYER_QUIT, playerListener, Priority.Normal, this);
-        pm.registerEvent(Type.PLAYER_KICK, playerListener, Priority.Normal, this);
+        pm.registerEvent(Type.PLAYER_JOIN, playerListener, Priority.Lowest, this);
+        pm.registerEvent(Type.PLAYER_QUIT, playerListener, Priority.Monitor, this);
+        pm.registerEvent(Type.PLAYER_KICK, playerListener, Priority.Monitor, this);
         pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Normal, this);
         pm.registerEvent(Type.BLOCK_PLACE, blockListener, Priority.Normal, this);
 
