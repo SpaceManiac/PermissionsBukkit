@@ -19,6 +19,7 @@ commands:
         /<command> group unsetperm <group> <[world:]node> - unset a permission on a group.
         /<command> player - list player-related commands.
         /<command> player groups <player> - list groups a player is in.
+        /<command> player setgroup <player> <group,...> - set a player to be in only the given groups.
         /<command> player addgroup <player> <group> - add a player to a group.
         /<command> player removegroup <player> <group> - remove a player from a group.
         /<command> player setperm <player> <[world:]node> [true|false] - set a permission on a player.
@@ -71,6 +72,7 @@ permissions:
     children:
       permissions.player.help: true
       permissions.player.groups: true
+      permissions.player.setgroup: true
       permissions.player.addgroup: true
       permissions.player.removegroup: true
       permissions.player.setperm: true
@@ -79,6 +81,8 @@ permissions:
     description: Allows viewing of usage for /permissions player.
   permissions.player.groups:
     description: Allows use of /permissions player groups.
+  permissions.player.setgroup:
+    description: Allows use of /permissions player setgroup.
   permissions.player.addgroup:
     description: Allows use of /permissions player addgroup.
   permissions.player.removegroup:

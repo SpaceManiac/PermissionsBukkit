@@ -1,6 +1,7 @@
 package com.platymuus.bukkit.permissions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -287,6 +288,21 @@ class PermissionsCommand implements CommandExecutor {
             }
             sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + player + ChatColor.GREEN + " is in groups (" + ChatColor.WHITE + count + ChatColor.GREEN + "): " + ChatColor.WHITE + text);
             return true;
+        } else if (subcommand.equals("setgroup")) {
+            if (!checkPerm(sender, "player.setgroup")) return true;
+            if (split.length != 4) return usage(sender, command, "player setgroup");
+            String player = split[2].toLowerCase();
+            String[] groups = split[3].split(",");
+            
+            if (plugin.getNode("users." + player) == null) {
+                createPlayerNode(player);
+            }
+            
+            plugin.getNode("users." + player).setProperty("groups", Arrays.asList(groups));
+            plugin.refreshPermissions();
+            
+            sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + player + ChatColor.GREEN + " is now in " + ChatColor.WHITE + split[3] + ChatColor.GREEN + ".");
+            return true;
         } else if (subcommand.equals("addgroup")) {
             if (!checkPerm(sender, "player.addgroup")) return true;
             if (split.length != 4) return usage(sender, command, "player addgroup");
@@ -454,7 +470,8 @@ class PermissionsCommand implements CommandExecutor {
         String desc = line.substring(i + 3);
 
         usage = usage.replace("<command>", "permissions");
-        usage = usage.replaceAll("\\[[^]]+\\]", ChatColor.AQUA + "$0" + ChatColor.GREEN);
+        usage = usage.replaceAll("\\[[^]:]+\\]", ChatColor.AQUA + "$0" + ChatColor.GREEN);
+        usage = usage.replaceAll("\\[[^]]+:\\]", ChatColor.AQUA + "$0" + ChatColor.LIGHT_PURPLE);
         usage = usage.replaceAll("<[^>]+>", ChatColor.LIGHT_PURPLE + "$0" + ChatColor.GREEN);
 
         return ChatColor.GREEN + usage + " - " + ChatColor.WHITE + desc;
