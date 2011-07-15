@@ -3,7 +3,7 @@ PermissionsBukkit
 
 A plugin providing groups and other permissions configuration for Bukkit's built-in permissions architecture.
 
-Sample configuration file and more info on how the configuration is laid out:
+Sample configuration file and more info on how the configuration is laid out follows:
 
 ```yaml
 # PermissionsBukkit configuration file
@@ -29,6 +29,11 @@ Sample configuration file and more info on how the configuration is laid out:
 # groups. Like user permissions, groups may override the permissions of their
 # parent group(s). Unlike users, groups do NOT automatically inherit from
 # default. World permissions may be assigned to groups with a 'worlds:' entry.
+#
+# The cannot-build message is configurable. If it is left blank, no message
+# will be displayed to the player if PermissionsBukkit prevents them from
+# building, digging, or interacting with a block. Use '&' characters to
+# signify color codes.
 
 users:
     ConspiracyWizard:
@@ -53,5 +58,6 @@ groups:
                 coolplugin.item: true
         inheritance:
         - default
-
+messages:
+    build: '&cYou do not have permission to build here.'
 ```

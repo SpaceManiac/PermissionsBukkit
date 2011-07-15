@@ -41,6 +41,7 @@ public class PermissionsPlugin extends JavaPlugin {
         pm.registerEvent(Type.PLAYER_JOIN, playerListener, Priority.Lowest, this);
         pm.registerEvent(Type.PLAYER_QUIT, playerListener, Priority.Monitor, this);
         pm.registerEvent(Type.PLAYER_KICK, playerListener, Priority.Monitor, this);
+        pm.registerEvent(Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
         pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Normal, this);
         pm.registerEvent(Type.BLOCK_PLACE, blockListener, Priority.Normal, this);
 
@@ -247,6 +248,7 @@ public class PermissionsPlugin extends JavaPlugin {
     }
 
     private void writeDefaultConfiguration() {
+        HashMap<String, Object> messages = new HashMap<String, Object>();
         HashMap<String, Object> users = new HashMap<String, Object>();
         HashMap<String, Object> user = new HashMap<String, Object>();
         HashMap<String, Object> user_permissions = new HashMap<String, Object>();
@@ -265,6 +267,8 @@ public class PermissionsPlugin extends JavaPlugin {
         HashMap<String, Object> group_admin = new HashMap<String, Object>();
         ArrayList<String> group_admin_inheritance = new ArrayList<String>();
         HashMap<String, Object> group_admin_permissions = new HashMap<String, Object>();
+        
+        messages.put("build", "&cYou do not have permission to build here.");
 
         user_permissions.put("permissions.example", true);
         user_groups.add("admin");
@@ -292,6 +296,7 @@ public class PermissionsPlugin extends JavaPlugin {
         groups.put("user", group_user);
         groups.put("admin", group_admin);
 
+        getConfiguration().setProperty("messages", messages);
         getConfiguration().setProperty("users", users);
         getConfiguration().setProperty("groups", groups);
 
@@ -319,6 +324,11 @@ public class PermissionsPlugin extends JavaPlugin {
             "# groups. Like user permissions, groups may override the permissions of their",
             "# parent group(s). Unlike users, groups do NOT automatically inherit from",
             "# default. World permissions may be assigned to groups with a 'worlds:' entry.",
+            "#",
+            "# The cannot-build message is configurable. If it is left blank, no message",
+            "# will be displayed to the player if PermissionsBukkit prevents them from",
+            "# building, digging, or interacting with a block. Use '&' characters to",
+            "# signify color codes.",
             "");
         getConfiguration().save();
     }

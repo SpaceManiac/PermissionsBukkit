@@ -15,14 +15,22 @@ public class BlockListener extends org.bukkit.event.block.BlockListener {
 
     @Override
     public void onBlockPlace(BlockPlaceEvent event) {
-        if (!event.getPlayer().hasPermission("permissions.build")) {
+        if (!event.getPlayer().isOp() && !event.getPlayer().hasPermission("permissions.build")) {
+            if (plugin.getConfiguration().getString("messages.build", "").length() > 0) {
+                String message = plugin.getConfiguration().getString("messages.build", "").replace('&', '\u00A7');
+                event.getPlayer().sendMessage(message);
+            }
             event.setCancelled(true);
         }
     }
 
     @Override
     public void onBlockBreak(BlockBreakEvent event) {
-        if (!event.getPlayer().hasPermission("permissions.build")) {
+        if (!event.getPlayer().isOp() && !event.getPlayer().hasPermission("permissions.build")) {
+            if (plugin.getConfiguration().getString("messages.build", "").length() > 0) {
+                String message = plugin.getConfiguration().getString("messages.build", "").replace('&', '\u00A7');
+                event.getPlayer().sendMessage(message);
+            }
             event.setCancelled(true);
         }
     }
