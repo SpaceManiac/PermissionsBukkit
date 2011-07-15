@@ -109,10 +109,8 @@ class PermissionsCommand implements CommandExecutor {
                 }
             }
             
-            String name = (permissible instanceof Player) ? ((Player) permissible).getName() : (permissible instanceof ConsoleCommandSender) ? "Console" : "Unknown";
-            
             if (permissible == null) {
-                sender.sendMessage(ChatColor.RED + "Player " + ChatColor.WHITE + name + ChatColor.RED + " not found.");
+                sender.sendMessage(ChatColor.RED + "Player " + ChatColor.WHITE + split[1] + ChatColor.RED + " not found.");
             } else {
                 ArrayList<PermissionAttachmentInfo> dump = new ArrayList<PermissionAttachmentInfo>(permissible.getEffectivePermissions());
                 Collections.sort(dump, new Comparator<PermissionAttachmentInfo>() {
