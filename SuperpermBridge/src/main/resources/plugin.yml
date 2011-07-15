@@ -1,0 +1,6 @@
+name: Permissions
+main: com.nijikokun.bukkit.Permissions.Permissions
+version: 2.7.7
+authors: [ SpaceManiac, t3hk0d3, TheYeti, Nijiko ]
+website: www.bukkit.org
+description: Compatibility layer between original Permissions and Bukkit Superperms
