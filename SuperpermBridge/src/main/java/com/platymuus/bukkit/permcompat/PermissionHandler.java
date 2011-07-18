@@ -18,31 +18,47 @@ public class PermissionHandler extends com.nijiko.permissions.PermissionHandler 
     public PermissionHandler() {
         server = Bukkit.getServer();
     }
+    
+    private boolean internalHasPermission(Player player, String permission) {
+        if (player.hasPermission("superpermbridge.*")) {
+            return true;
+        }
+
+        int index = permission.indexOf('.');
+        if (index >= 0) {
+            String pluginName = permission.substring(0, index);
+            if (player.hasPermission("superpermbridge." + pluginName)) {
+                return true;
+            }
+        }
+        
+        return player.hasPermission(permission);
+    }
 
     @Override
     public boolean has(Player player, String permission) {
-        return player.hasPermission(permission);
+        return internalHasPermission(player, permission);
     }
 
     @Override
     public boolean has(String worldName, String playerName, String permission) {
         if (server.getPlayer(playerName) == null) return false;
-        return server.getPlayer(playerName).hasPermission(permission);
+        return internalHasPermission(server.getPlayer(playerName), permission);
     }
 
     @Override
     public boolean permission(Player player, String permission) {
-        return player.hasPermission(permission);
+        return internalHasPermission(player, permission);
     }
     
     public boolean permission(String worldName, Player player, String permission){
-        return player.hasPermission(permission);
+        return internalHasPermission(player, permission);
     }
 
     @Override
     public boolean permission(String worldName, String playerName, String permission) {
         if (server.getPlayer(playerName) == null) return false;
-        return server.getPlayer(playerName).hasPermission(permission);
+        return internalHasPermission(server.getPlayer(playerName), permission);
     }
 
     @Override

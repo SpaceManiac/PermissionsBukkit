@@ -4,3 +4,8 @@ version: 2.7.7
 authors: [ SpaceManiac, t3hk0d3, TheYeti, Nijiko ]
 website: www.bukkit.org
 description: Compatibility layer between original Permissions and Bukkit Superperms
+permissions:
+  superperms.*:
+    description: Acts like a global '*' permission node for plugins going through the bridge.
+  superperms.PLUGINNAME:
+    description: Acts like a global 'PLUGINNAME.*' permission node for plugins going through the bridge.
