@@ -32,7 +32,15 @@ public class PermissionHandler extends com.nijiko.permissions.PermissionHandler 
             }
         }
         
-        return player.hasPermission(permission);
+        while (index >= 0) {
+            String subnodeName = permission.substring(0, index);
+            if (player.hasPermission("superpermbridge." + subnodeName + ".*")) {
+                return true;
+            }
+            index = permission.indexOf('.', index + 1);
+        }
+        
+        return player.hasPermission("superpermbridge." + permission) || player.hasPermission(permission);
     }
 
     @Override
