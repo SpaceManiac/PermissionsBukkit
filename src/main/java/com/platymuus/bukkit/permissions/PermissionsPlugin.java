@@ -22,7 +22,7 @@ public class PermissionsPlugin extends JavaPlugin {
     private BlockListener blockListener = new BlockListener(this);
     private PlayerListener playerListener = new PlayerListener(this);
     private PermissionsCommand commandExecutor = new PermissionsCommand(this);
-    private HashMap<Player, PermissionAttachment> permissions = new HashMap<Player, PermissionAttachment>();
+    private HashMap<String, PermissionAttachment> permissions = new HashMap<String, PermissionAttachment>();
 
     // -- Basic stuff
     @Override
@@ -57,9 +57,9 @@ public class PermissionsPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         // Unregister everyone
-        for (Player p : getServer().getOnlinePlayers()) {
-            unregisterPlayer(p);
-        }
+        //for (Player p : getServer().getOnlinePlayers()) {
+        //    unregisterPlayer(p);
+        //}
 
         // Good day to you! I said good day!
         getServer().getLogger().info(getDescription().getFullName() + " is now disabled");
@@ -129,24 +129,24 @@ public class PermissionsPlugin extends JavaPlugin {
     // -- Plugin stuff
     protected void registerPlayer(Player player) {
         PermissionAttachment attachment = player.addAttachment(this);
-        permissions.put(player, attachment);
+        permissions.put(player.getName(), attachment);
         calculateAttachment(player);
     }
 
     protected void unregisterPlayer(Player player) {
-        player.removeAttachment(permissions.get(player));
-        permissions.remove(player);
+        player.removeAttachment(permissions.get(player.getName()));
+        permissions.remove(player.getName());
     }
 
     protected void refreshPermissions() {
         getConfiguration().save();
-        for (Player player : permissions.keySet()) {
+        for (String player : permissions.keySet()) {
             PermissionAttachment attachment = permissions.get(player);
             for (String key : attachment.getPermissions().keySet()) {
                 attachment.unsetPermission(key);
             }
 
-            calculateAttachment(player);
+            calculateAttachment(getServer().getPlayer(player));
         }
     }
 
@@ -184,7 +184,8 @@ public class PermissionsPlugin extends JavaPlugin {
     }
 
     private void calculateAttachment(Player player) {
-        PermissionAttachment attachment = permissions.get(player);
+        if (player == null) return;
+        PermissionAttachment attachment = permissions.get(player.getName());
 
         for (Map.Entry<String, Object> entry : calculatePlayerPermissions(player.getName().toLowerCase(), player.getWorld().getName()).entrySet()) {
             if (entry.getValue() != null && entry.getValue() instanceof Boolean) {

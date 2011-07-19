@@ -39,6 +39,7 @@ class PermissionsCommand implements CommandExecutor {
         if (subcommand.equals("reload")) {
             if (!checkPerm(sender, "reload")) return true;
             plugin.getConfiguration().load();
+            plugin.refreshPermissions();
             sender.sendMessage(ChatColor.GREEN + "Configuration reloaded.");
             return true;
         } if (subcommand.equals("check")) {
@@ -58,8 +59,10 @@ class PermissionsCommand implements CommandExecutor {
             if (permissible == null) {
                 sender.sendMessage(ChatColor.RED + "Player " + ChatColor.WHITE + split[2] + ChatColor.RED + " not found.");
             } else {
-                String has = permissible.hasPermission(node) ? ChatColor.AQUA + "has" : ChatColor.LIGHT_PURPLE + "does not have";
-                sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + name + " " + has + ChatColor.GREEN + " " + node);
+                boolean set = permissible.isPermissionSet(node), has = permissible.hasPermission(node);
+                String sets = set ? " sets " : " defaults ";
+                String perm = has ? " true" : " false";
+                sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + name + ChatColor.GREEN + sets + ChatColor.WHITE + node + ChatColor.GREEN + " to " + ChatColor.WHITE + perm + ChatColor.GREEN + ".");
             }
             return true;
         } else if (subcommand.equals("info")) {
@@ -419,6 +422,9 @@ class PermissionsCommand implements CommandExecutor {
         groups.add("default");
         HashMap<String, Object> user = new HashMap<String, Object>();
         user.put("groups", groups);
+        if (plugin.getNode("users") == null) {
+            plugin.getConfiguration().setProperty("users", new HashMap<String, Object>());
+        }
         plugin.getNode("users").setProperty(player, user);
     }
 
