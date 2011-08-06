@@ -5,7 +5,7 @@ import org.bukkit.event.block.*;
 /**
  * Player listener: takes care of registering and unregistering players on join
  */
-public class BlockListener extends org.bukkit.event.block.BlockListener {
+class BlockListener extends org.bukkit.event.block.BlockListener {
 
     private PermissionsPlugin plugin;
 

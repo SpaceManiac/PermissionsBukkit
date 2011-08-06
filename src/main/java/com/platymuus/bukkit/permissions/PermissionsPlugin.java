@@ -23,13 +23,15 @@ public class PermissionsPlugin extends JavaPlugin {
     private PlayerListener playerListener = new PlayerListener(this);
     private PermissionsCommand commandExecutor = new PermissionsCommand(this);
     private HashMap<String, PermissionAttachment> permissions = new HashMap<String, PermissionAttachment>();
+    private HashMap<String, String> lastWorld = new HashMap<String, String>();
 
     // -- Basic stuff
     @Override
     public void onEnable() {
         // Write some default configuration
         if (!new File(getDataFolder(), "config.yml").exists()) {
-            getServer().getLogger().info("Generating default configuration");
+            getDataFolder().mkdirs();
+            getServer().getLogger().info("[PermissionsBukkit] Generating default configuration");
             writeDefaultConfiguration();
         }
 
@@ -39,6 +41,8 @@ public class PermissionsPlugin extends JavaPlugin {
         // Events
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvent(Type.PLAYER_JOIN, playerListener, Priority.Lowest, this);
+        pm.registerEvent(Type.PLAYER_MOVE, playerListener, Priority.Lowest, this);
+        pm.registerEvent(Type.PLAYER_TELEPORT, playerListener, Priority.Lowest, this);
         pm.registerEvent(Type.PLAYER_QUIT, playerListener, Priority.Monitor, this);
         pm.registerEvent(Type.PLAYER_KICK, playerListener, Priority.Monitor, this);
         pm.registerEvent(Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
@@ -51,18 +55,18 @@ public class PermissionsPlugin extends JavaPlugin {
         }
 
         // How are you gentlemen
-        getServer().getLogger().info(getDescription().getFullName() + " is now enabled");
+        getServer().getLogger().info(this + " is now enabled");
     }
 
     @Override
     public void onDisable() {
         // Unregister everyone
-        //for (Player p : getServer().getOnlinePlayers()) {
-        //    unregisterPlayer(p);
-        //}
+        for (Player p : getServer().getOnlinePlayers()) {
+            unregisterPlayer(p);
+        }
 
         // Good day to you! I said good day!
-        getServer().getLogger().info(getDescription().getFullName() + " is now disabled");
+        getServer().getLogger().info(this + " is now disabled");
     }
 
     // -- External API
@@ -127,15 +131,38 @@ public class PermissionsPlugin extends JavaPlugin {
     }
 
     // -- Plugin stuff
+    
     protected void registerPlayer(Player player) {
+        if (permissions.containsKey(player.getName())) {
+            debug("Registering " + player.getName() + ": was already registered");
+            unregisterPlayer(player);
+        }
         PermissionAttachment attachment = player.addAttachment(this);
         permissions.put(player.getName(), attachment);
-        calculateAttachment(player);
+        setLastWorld(player.getName(), player.getWorld().getName());
     }
 
     protected void unregisterPlayer(Player player) {
-        player.removeAttachment(permissions.get(player.getName()));
-        permissions.remove(player.getName());
+        if (permissions.containsKey(player.getName())) {
+            try {
+                player.removeAttachment(permissions.get(player.getName()));
+            }
+            catch (IllegalArgumentException ex) {
+                debug("Unregistering " + player.getName() + ": player did not have attachment");
+            }
+            permissions.remove(player.getName());
+            lastWorld.remove(player.getName());
+        } else {
+            debug("Unregistering " + player.getName() + ": was not registered");
+        }
+    }
+
+    protected void setLastWorld(String player, String world) {
+        if (lastWorld.get(player) == null || !lastWorld.get(player).equals(world)) {
+            debug("Player " + player + " moved to world " + world + ", recalculating...");
+            lastWorld.put(player, world);
+            calculateAttachment(getServer().getPlayer(player));
+        }
     }
 
     protected void refreshPermissions() {
@@ -152,6 +179,12 @@ public class PermissionsPlugin extends JavaPlugin {
 
     protected ConfigurationNode getNode(String child) {
         return getNode("", child);
+    }
+    
+    protected void debug(String message) {
+        if (getConfiguration().getBoolean("debug", false)) {
+            getServer().getLogger().info("[PermissionsBukkit] [Debug] " + message);
+        }
     }
 
     // -- Private stuff
@@ -184,10 +217,12 @@ public class PermissionsPlugin extends JavaPlugin {
     }
 
     private void calculateAttachment(Player player) {
-        if (player == null) return;
+        if (player == null) {
+            return;
+        }
         PermissionAttachment attachment = permissions.get(player.getName());
 
-        for (Map.Entry<String, Object> entry : calculatePlayerPermissions(player.getName().toLowerCase(), player.getWorld().getName()).entrySet()) {
+        for (Map.Entry<String, Object> entry : calculatePlayerPermissions(player.getName().toLowerCase(), lastWorld.get(player.getName())).entrySet()) {
             if (entry.getValue() != null && entry.getValue() instanceof Boolean) {
                 attachment.setPermission(entry.getKey(), (Boolean) entry.getValue());
             } else {
@@ -268,7 +303,7 @@ public class PermissionsPlugin extends JavaPlugin {
         HashMap<String, Object> group_admin = new HashMap<String, Object>();
         ArrayList<String> group_admin_inheritance = new ArrayList<String>();
         HashMap<String, Object> group_admin_permissions = new HashMap<String, Object>();
-        
+
         messages.put("build", "&cYou do not have permission to build here.");
 
         user_permissions.put("permissions.example", true);

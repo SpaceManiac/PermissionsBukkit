@@ -6,7 +6,7 @@ import org.bukkit.event.player.*;
 /**
  * Player listener: takes care of registering and unregistering players on join
  */
-public class PlayerListener extends org.bukkit.event.player.PlayerListener {
+class PlayerListener extends org.bukkit.event.player.PlayerListener {
 
     private PermissionsPlugin plugin;
 
@@ -16,17 +16,30 @@ public class PlayerListener extends org.bukkit.event.player.PlayerListener {
 
     @Override
     public void onPlayerJoin(PlayerJoinEvent event) {
+        plugin.debug("Player " + event.getPlayer().getName() + " joined, registering...");
         plugin.registerPlayer(event.getPlayer());
     }
 
     @Override
     public void onPlayerQuit(PlayerQuitEvent event) {
+        plugin.debug("Player " + event.getPlayer().getName() + " quit, unregistering...");
         plugin.unregisterPlayer(event.getPlayer());
     }
 
     @Override
     public void onPlayerKick(PlayerKickEvent event) {
+        plugin.debug("Player " + event.getPlayer().getName() + " was kicked, unregistering...");
         plugin.unregisterPlayer(event.getPlayer());
+    }
+    
+    @Override
+    public void onPlayerMove(PlayerMoveEvent event) {
+        plugin.setLastWorld(event.getPlayer().getName(), event.getTo().getWorld().getName());
+    }
+    
+    @Override
+    public void onPlayerTeleport(PlayerTeleportEvent event) {
+        plugin.setLastWorld(event.getPlayer().getName(), event.getTo().getWorld().getName());
     }
     
     @Override
@@ -35,7 +48,7 @@ public class PlayerListener extends org.bukkit.event.player.PlayerListener {
             return;
         }
         if (!event.getPlayer().isOp() && !event.getPlayer().hasPermission("permissions.build")) {
-            if (plugin.getConfiguration().getString("messages.build", "").length() > 0) {
+            if (event.getAction() != Action.PHYSICAL && plugin.getConfiguration().getString("messages.build", "").length() > 0) {
                 String message = plugin.getConfiguration().getString("messages.build", "").replace('&', '\u00A7');
                 event.getPlayer().sendMessage(message);
             }
