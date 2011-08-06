@@ -221,6 +221,14 @@ public class PermissionsPlugin extends JavaPlugin {
             return;
         }
         PermissionAttachment attachment = permissions.get(player.getName());
+        if (attachment == null) {
+            debug("Calculating permissions on " + player.getName() + ": attachment was null");
+            return;
+        }
+        
+        for (String key : attachment.getPermissions().keySet()) {
+            attachment.unsetPermission(key);
+        }
 
         for (Map.Entry<String, Object> entry : calculatePlayerPermissions(player.getName().toLowerCase(), lastWorld.get(player.getName())).entrySet()) {
             if (entry.getValue() != null && entry.getValue() instanceof Boolean) {
