@@ -158,7 +158,8 @@ public class PermissionsPlugin extends JavaPlugin {
     }
 
     protected void setLastWorld(String player, String world) {
-        if (lastWorld.get(player) == null || !lastWorld.get(player).equals(world)) {
+		// from krinsdeath; added check for player's existence on initial login
+        if ((lastWorld.get(player) == null || !lastWorld.get(player).equals(world)) && permissions.containsKey(player)) {
             debug("Player " + player + " moved to world " + world + ", recalculating...");
             lastWorld.put(player, world);
             calculateAttachment(getServer().getPlayer(player));
