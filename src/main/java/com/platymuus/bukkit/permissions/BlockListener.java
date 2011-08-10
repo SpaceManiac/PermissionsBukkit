@@ -15,6 +15,9 @@ class BlockListener extends org.bukkit.event.block.BlockListener {
 
     @Override
     public void onBlockPlace(BlockPlaceEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
         if (!event.getPlayer().isOp() && !event.getPlayer().hasPermission("permissions.build")) {
             if (plugin.getConfiguration().getString("messages.build", "").length() > 0) {
                 String message = plugin.getConfiguration().getString("messages.build", "").replace('&', '\u00A7');
@@ -26,6 +29,9 @@ class BlockListener extends org.bukkit.event.block.BlockListener {
 
     @Override
     public void onBlockBreak(BlockBreakEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
         if (!event.getPlayer().isOp() && !event.getPlayer().hasPermission("permissions.build")) {
             if (plugin.getConfiguration().getString("messages.build", "").length() > 0) {
                 String message = plugin.getConfiguration().getString("messages.build", "").replace('&', '\u00A7');
@@ -34,5 +40,4 @@ class BlockListener extends org.bukkit.event.block.BlockListener {
             event.setCancelled(true);
         }
     }
-
 }

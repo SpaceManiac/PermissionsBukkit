@@ -28,22 +28,34 @@ class PlayerListener extends org.bukkit.event.player.PlayerListener {
 
     @Override
     public void onPlayerKick(PlayerKickEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
         plugin.debug("Player " + event.getPlayer().getName() + " was kicked, unregistering...");
         plugin.unregisterPlayer(event.getPlayer());
     }
-    
+
     @Override
     public void onPlayerMove(PlayerMoveEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
         plugin.setLastWorld(event.getPlayer().getName(), event.getTo().getWorld().getName());
     }
-    
+
     @Override
     public void onPlayerTeleport(PlayerTeleportEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
         plugin.setLastWorld(event.getPlayer().getName(), event.getTo().getWorld().getName());
     }
-    
+
     @Override
     public void onPlayerInteract(PlayerInteractEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
         if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_AIR) {
             return;
         }
@@ -55,5 +67,4 @@ class PlayerListener extends org.bukkit.event.player.PlayerListener {
             event.setCancelled(true);
         }
     }
-
 }
