@@ -19,8 +19,8 @@ import org.bukkit.util.config.ConfigurationNode;
  */
 public class PermissionsPlugin extends JavaPlugin {
 
-    private BlockListener blockListener = new BlockListener(this);
-    private PlayerListener playerListener = new PlayerListener(this);
+    private BlockListener blockListener;
+    private PlayerListener playerListener;
     private PermissionsCommand commandExecutor = new PermissionsCommand(this);
     private HashMap<String, PermissionAttachment> permissions = new HashMap<String, PermissionAttachment>();
     private HashMap<String, String> lastWorld = new HashMap<String, String>();
@@ -28,6 +28,8 @@ public class PermissionsPlugin extends JavaPlugin {
     // -- Basic stuff
     @Override
     public void onEnable() {
+        blockListener = new BlockListener(this);
+        playerListener = new PlayerListener(this);
         // Write some default configuration
         if (!new File(getDataFolder(), "config.yml").exists()) {
             getDataFolder().mkdirs();
@@ -281,6 +283,10 @@ public class PermissionsPlugin extends JavaPlugin {
         }
 
         for (String parent : getNode("groups." + group).getStringList("inheritance", new ArrayList<String>())) {
+            if (parent.equalsIgnoreCase(group)) {
+                debug("Warning! '" + group + "' is inheriting from itself!");
+                continue;
+            }
             for (Map.Entry<String, Object> entry : calculateGroupPermissions(parent, world).entrySet()) {
                 if (!perms.containsKey(entry.getKey())) { // Children override permissions
                     perms.put(entry.getKey(), entry.getValue());
