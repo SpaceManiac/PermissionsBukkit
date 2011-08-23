@@ -28,14 +28,16 @@ public class PermissionsPlugin extends JavaPlugin {
     // -- Basic stuff
     @Override
     public void onEnable() {
-        blockListener = new BlockListener(this);
-        playerListener = new PlayerListener(this);
         // Write some default configuration
         if (!new File(getDataFolder(), "config.yml").exists()) {
             getDataFolder().mkdirs();
             getServer().getLogger().info("[PermissionsBukkit] Generating default configuration");
             writeDefaultConfiguration();
         }
+
+        // listeners
+        blockListener = new BlockListener(this);
+        playerListener = new PlayerListener(this);
 
         // Commands
         getCommand("permissions").setExecutor(commandExecutor);
@@ -53,7 +55,7 @@ public class PermissionsPlugin extends JavaPlugin {
 
         // Register everyone online right now
         for (Player p : getServer().getOnlinePlayers()) {
-            registerPlayer(p);
+            registerPlayer(p.getName());
         }
 
         // How are you gentlemen
@@ -64,7 +66,7 @@ public class PermissionsPlugin extends JavaPlugin {
     public void onDisable() {
         // Unregister everyone
         for (Player p : getServer().getOnlinePlayers()) {
-            unregisterPlayer(p);
+            unregisterPlayer(p.getName());
         }
 
         // Good day to you! I said good day!
@@ -134,28 +136,28 @@ public class PermissionsPlugin extends JavaPlugin {
 
     // -- Plugin stuff
     
-    protected void registerPlayer(Player player) {
-        if (permissions.containsKey(player.getName())) {
-            debug("Registering " + player.getName() + ": was already registered");
+    protected void registerPlayer(String player) {
+        if (permissions.containsKey(player)) {
+            debug("Registering " + player + ": was already registered");
             unregisterPlayer(player);
         }
-        PermissionAttachment attachment = player.addAttachment(this);
-        permissions.put(player.getName(), attachment);
-        setLastWorld(player.getName(), player.getWorld().getName());
+        PermissionAttachment attachment = getServer().getPlayer(player).addAttachment(this);
+        permissions.put(player, attachment);
+        setLastWorld(player, getServer().getPlayer(player).getWorld().getName());
     }
 
-    protected void unregisterPlayer(Player player) {
-        if (permissions.containsKey(player.getName())) {
+    protected void unregisterPlayer(String player) {
+        if (permissions.containsKey(player)) {
             try {
-                player.removeAttachment(permissions.get(player.getName()));
+                getServer().getPlayer(player).removeAttachment(permissions.get(player));
             }
             catch (IllegalArgumentException ex) {
-                debug("Unregistering " + player.getName() + ": player did not have attachment");
+                debug("Unregistering " + player + ": player did not have attachment");
             }
-            permissions.remove(player.getName());
-            lastWorld.remove(player.getName());
+            permissions.remove(player);
+            lastWorld.remove(player);
         } else {
-            debug("Unregistering " + player.getName() + ": was not registered");
+            debug("Unregistering " + player + ": was not registered");
         }
     }
 

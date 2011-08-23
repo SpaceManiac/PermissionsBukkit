@@ -13,26 +13,26 @@ class PlayerListener extends org.bukkit.event.player.PlayerListener {
 
     public PlayerListener(PermissionsPlugin plugin) {
         this.plugin = plugin;
-        MESSAGE = plugin.getConfiguration().getString("messages.build", "").replace('&', '\u00A7');
+        MESSAGE = plugin.getConfiguration().getString("messages.build", "").replaceAll("(?i)&([0-F])", "\u00A7$1");
     }
 
     @Override
     public void onPlayerJoin(PlayerJoinEvent event) {
         plugin.debug("Player " + event.getPlayer().getName() + " joined, registering...");
-        plugin.registerPlayer(event.getPlayer());
+        plugin.registerPlayer(event.getPlayer().getName());
     }
 
     @Override
     public void onPlayerQuit(PlayerQuitEvent event) {
         plugin.debug("Player " + event.getPlayer().getName() + " quit, unregistering...");
-        plugin.unregisterPlayer(event.getPlayer());
+        plugin.unregisterPlayer(event.getPlayer().getName());
     }
 
     @Override
     public void onPlayerKick(PlayerKickEvent event) {
         if (event.isCancelled()) { return; }
         plugin.debug("Player " + event.getPlayer().getName() + " was kicked, unregistering...");
-        plugin.unregisterPlayer(event.getPlayer());
+        plugin.unregisterPlayer(event.getPlayer().getName());
     }
     
     @Override

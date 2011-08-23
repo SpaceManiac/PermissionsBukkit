@@ -7,10 +7,12 @@ import org.bukkit.event.block.*;
  */
 class BlockListener extends org.bukkit.event.block.BlockListener {
 
+    private PermissionsPlugin plugin;
     private final String MESSAGE;
 
     public BlockListener(PermissionsPlugin plugin) {
-        MESSAGE = plugin.getConfiguration().getString("messages.build", "").replace('&', '\u00A7');
+        this.plugin = plugin;
+        MESSAGE = plugin.getConfiguration().getString("messages.build", "").replaceAll("(?i)&([0-F])", "\u00A7$1");
     }
 
     @Override
