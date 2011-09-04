@@ -2,6 +2,8 @@ package com.platymuus.bukkit.permissions;
 
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 
 /**
  * Player listener: takes care of registering and unregistering players on join
@@ -53,6 +55,11 @@ class PlayerListener extends org.bukkit.event.player.PlayerListener {
                 event.getPlayer().sendMessage(message);
             }
             event.setCancelled(true);
+            try {
+                Block block = event.getClickedBlock();
+                ((Sign) block.getState()).update(true);
+            } catch (Exception ex){
+            }
         }
     }
 
