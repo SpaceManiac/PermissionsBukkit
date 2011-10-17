@@ -15,7 +15,7 @@ class PlayerListener extends org.bukkit.event.player.PlayerListener {
     }
 
     @Override
-    public void onPlayerJoin(PlayerJoinEvent event) {
+    public void onPlayerLogin(PlayerLoginEvent event) {
         plugin.debug("Player " + event.getPlayer().getName() + " joined, registering...");
         plugin.registerPlayer(event.getPlayer());
     }
