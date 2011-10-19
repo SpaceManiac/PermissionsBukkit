@@ -23,7 +23,6 @@ public class PermissionsPlugin extends JavaPlugin {
     private PlayerListener playerListener = new PlayerListener(this);
     private PermissionsCommand commandExecutor = new PermissionsCommand(this);
     private HashMap<String, PermissionAttachment> permissions = new HashMap<String, PermissionAttachment>();
-    private HashMap<String, String> lastWorld = new HashMap<String, String>();
 
     // -- Basic stuff
     @Override
@@ -41,8 +40,7 @@ public class PermissionsPlugin extends JavaPlugin {
         // Events
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvent(Type.PLAYER_JOIN, playerListener, Priority.Lowest, this);
-        pm.registerEvent(Type.PLAYER_MOVE, playerListener, Priority.Lowest, this);
-        pm.registerEvent(Type.PLAYER_TELEPORT, playerListener, Priority.Lowest, this);
+        pm.registerEvent(Type.PLAYER_CHANGED_WORLD, playerListener, Priority.Lowest, this);
         pm.registerEvent(Type.PLAYER_QUIT, playerListener, Priority.Monitor, this);
         pm.registerEvent(Type.PLAYER_KICK, playerListener, Priority.Monitor, this);
         pm.registerEvent(Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
@@ -139,7 +137,7 @@ public class PermissionsPlugin extends JavaPlugin {
         }
         PermissionAttachment attachment = player.addAttachment(this);
         permissions.put(player.getName(), attachment);
-        setLastWorld(player.getName(), player.getWorld().getName());
+        calculateAttachment(player);
     }
 
     protected void unregisterPlayer(Player player) {
@@ -151,17 +149,8 @@ public class PermissionsPlugin extends JavaPlugin {
                 debug("Unregistering " + player.getName() + ": player did not have attachment");
             }
             permissions.remove(player.getName());
-            lastWorld.remove(player.getName());
         } else {
             debug("Unregistering " + player.getName() + ": was not registered");
-        }
-    }
-
-    protected void setLastWorld(String player, String world) {
-        if (permissions.containsKey(player) && (lastWorld.get(player) == null || !lastWorld.get(player).equals(world))) {
-            debug("Player " + player + " moved to world " + world + ", recalculating...");
-            lastWorld.put(player, world);
-            calculateAttachment(getServer().getPlayer(player));
         }
     }
 
@@ -216,7 +205,7 @@ public class PermissionsPlugin extends JavaPlugin {
         return null;
     }
 
-    private void calculateAttachment(Player player) {
+    protected void calculateAttachment(Player player) {
         if (player == null) {
             return;
         }
@@ -230,7 +219,7 @@ public class PermissionsPlugin extends JavaPlugin {
             attachment.unsetPermission(key);
         }
 
-        for (Map.Entry<String, Object> entry : calculatePlayerPermissions(player.getName().toLowerCase(), lastWorld.get(player.getName())).entrySet()) {
+        for (Map.Entry<String, Object> entry : calculatePlayerPermissions(player.getName().toLowerCase(), player.getWorld().getName()).entrySet()) {
             if (entry.getValue() != null && entry.getValue() instanceof Boolean) {
                 attachment.setPermission(entry.getKey(), (Boolean) entry.getValue());
             } else {
