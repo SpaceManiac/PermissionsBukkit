@@ -33,13 +33,8 @@ class PlayerListener extends org.bukkit.event.player.PlayerListener {
     }
     
     @Override
-    public void onPlayerMove(PlayerMoveEvent event) {
-        plugin.setLastWorld(event.getPlayer().getName(), event.getTo().getWorld().getName());
-    }
-    
-    @Override
-    public void onPlayerTeleport(PlayerTeleportEvent event) {
-        plugin.setLastWorld(event.getPlayer().getName(), event.getTo().getWorld().getName());
+    public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
+        plugin.calculateAttachment(event.getPlayer());
     }
     
     @Override
