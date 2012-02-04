@@ -4,9 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.player.*;
 
 /**
@@ -30,7 +28,7 @@ class PlayerListener implements Listener {
     // Register players when needed
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerJoin(PlayerJoinEvent event) {
+    public void onPlayerLogin(PlayerLoginEvent event) {
         plugin.debug("Player " + event.getPlayer().getName() + " joined, registering...");
         plugin.registerPlayer(event.getPlayer());
     }
@@ -39,6 +37,7 @@ class PlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerKick(PlayerKickEvent event) {
+        if (event.isCancelled()) return;
         plugin.debug("Player " + event.getPlayer().getName() + " was kicked, unregistering...");
         plugin.unregisterPlayer(event.getPlayer());
     }
@@ -53,6 +52,7 @@ class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
+        if (event.isCancelled()) return;
         if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_AIR) {
             return;
         }
@@ -64,6 +64,7 @@ class PlayerListener implements Listener {
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
+        if (event.isCancelled()) return;
         if (!event.getPlayer().hasPermission("permissions.build")) {
             bother(event.getPlayer());
             event.setCancelled(true);
@@ -72,6 +73,7 @@ class PlayerListener implements Listener {
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
+        if (event.isCancelled()) return;
         if (!event.getPlayer().hasPermission("permissions.build")) {
             bother(event.getPlayer());
             event.setCancelled(true);
