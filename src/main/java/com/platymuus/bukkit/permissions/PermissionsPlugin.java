@@ -19,7 +19,6 @@ import org.bukkit.util.config.ConfigurationNode;
  */
 public class PermissionsPlugin extends JavaPlugin {
 
-    private BlockListener blockListener = new BlockListener(this);
     private PlayerListener playerListener = new PlayerListener(this);
     private PermissionsCommand commandExecutor = new PermissionsCommand(this);
     private HashMap<String, PermissionAttachment> permissions = new HashMap<String, PermissionAttachment>();
@@ -31,23 +30,13 @@ public class PermissionsPlugin extends JavaPlugin {
         // Write some default configuration
         if (!new File(getDataFolder(), "config.yml").exists()) {
             getDataFolder().mkdirs();
-            getServer().getLogger().info("[PermissionsBukkit] Generating default configuration");
+            getLogger().info("Generating default configuration");
             writeDefaultConfiguration();
         }
 
-        // Commands
+        // Register stuff
         getCommand("permissions").setExecutor(commandExecutor);
-
-        // Events
-        PluginManager pm = getServer().getPluginManager();
-        pm.registerEvent(Type.PLAYER_JOIN, playerListener, Priority.Lowest, this);
-        pm.registerEvent(Type.PLAYER_MOVE, playerListener, Priority.Lowest, this);
-        pm.registerEvent(Type.PLAYER_TELEPORT, playerListener, Priority.Lowest, this);
-        pm.registerEvent(Type.PLAYER_QUIT, playerListener, Priority.Monitor, this);
-        pm.registerEvent(Type.PLAYER_KICK, playerListener, Priority.Monitor, this);
-        pm.registerEvent(Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
-        pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Normal, this);
-        pm.registerEvent(Type.BLOCK_PLACE, blockListener, Priority.Normal, this);
+        getServer().getPluginManager().registerEvents(playerListener, this);
 
         // Register everyone online right now
         for (Player p : getServer().getOnlinePlayers()) {
@@ -55,7 +44,7 @@ public class PermissionsPlugin extends JavaPlugin {
         }
 
         // How are you gentlemen
-        getServer().getLogger().info(this + " is now enabled");
+        getLogger().info("Enabled successfully, " + getServer().getOnlinePlayers().length + " players registered");
     }
 
     @Override
@@ -66,7 +55,7 @@ public class PermissionsPlugin extends JavaPlugin {
         }
 
         // Good day to you! I said good day!
-        getServer().getLogger().info(this + " is now disabled");
+        getLogger().info("Disabled successfully, " + getServer().getOnlinePlayers().length + " players unregistered");
     }
 
     // -- External API
@@ -183,7 +172,7 @@ public class PermissionsPlugin extends JavaPlugin {
     
     protected void debug(String message) {
         if (getConfiguration().getBoolean("debug", false)) {
-            getServer().getLogger().info("[PermissionsBukkit] [Debug] " + message);
+            getLogger().info("Debug: " + message);
         }
     }
 
@@ -234,7 +223,7 @@ public class PermissionsPlugin extends JavaPlugin {
             if (entry.getValue() != null && entry.getValue() instanceof Boolean) {
                 attachment.setPermission(entry.getKey(), (Boolean) entry.getValue());
             } else {
-                getServer().getLogger().warning("[PermissionsBukkit] Node " + entry.getKey() + " for player " + player.getName() + " is non-Boolean");
+                getLogger().warning("Node " + entry.getKey() + " for player " + player.getName() + " is non-Boolean");
             }
         }
 
