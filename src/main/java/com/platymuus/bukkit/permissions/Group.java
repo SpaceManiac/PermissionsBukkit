@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-import org.bukkit.util.config.ConfigurationNode;
 
 /**
  * A class representing a permissions group.
@@ -27,8 +27,8 @@ public class Group {
     public List<String> getPlayers() {
         ArrayList<String> result = new ArrayList<String>();
         if (plugin.getNode("users") != null) {
-            for (String user : plugin.getNode("users").getKeys()) {
-                for (String group : plugin.getNode("users." + user).getStringList("groups", new ArrayList<String>())) {
+            for (String user : plugin.getNode("users").getKeys(false)) {
+                for (String group : plugin.getNode("users." + user).getStringList("groups")) {
                     if (name.equalsIgnoreCase(group) && !result.contains(user)) {
                         result.add(user);
                     }
@@ -50,7 +50,7 @@ public class Group {
     }
 
     public PermissionInfo getInfo() {
-        ConfigurationNode node = plugin.getNode("groups." + name);
+        ConfigurationSection node = plugin.getNode("groups." + name);
         if (node == null) {
             return null;
         }
@@ -59,10 +59,7 @@ public class Group {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || !(o instanceof Group)) {
-            return false;
-        }
-        return name.equalsIgnoreCase(((Group) o).getName());
+        return !(o == null || !(o instanceof Group)) && name.equalsIgnoreCase(((Group) o).getName());
     }
 
     @Override
