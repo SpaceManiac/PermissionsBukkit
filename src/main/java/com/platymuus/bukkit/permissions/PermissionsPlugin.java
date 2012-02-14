@@ -1,6 +1,5 @@
 package com.platymuus.bukkit.permissions;
 
-import java.io.File;
 import java.util.*;
 
 import org.bukkit.configuration.ConfigurationSection;
@@ -22,12 +21,7 @@ public class PermissionsPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         // Write some default configuration
-        this.saveDefaultConfig();
-        if (!new File(getDataFolder(), "config.yml").exists()) {
-            getDataFolder().mkdirs();
-            getLogger().info("Generating default configuration");
-            writeDefaultConfiguration();
-        }
+        saveDefaultConfig();
 
         // Register stuff
         getCommand("permissions").setExecutor(commandExecutor);
@@ -281,92 +275,6 @@ public class PermissionsPlugin extends JavaPlugin {
         }
 
         return perms;
-    }
-
-    private void writeDefaultConfiguration() {
-        HashMap<String, Object> messages = new HashMap<String, Object>();
-        HashMap<String, Object> users = new HashMap<String, Object>();
-        HashMap<String, Object> user = new HashMap<String, Object>();
-        HashMap<String, Object> user_permissions = new HashMap<String, Object>();
-        ArrayList<String> user_groups = new ArrayList<String>();
-
-        HashMap<String, Object> groups = new HashMap<String, Object>();
-        HashMap<String, Object> group_default = new HashMap<String, Object>();
-        HashMap<String, Object> group_default_permissions = new HashMap<String, Object>();
-
-        HashMap<String, Object> group_user = new HashMap<String, Object>();
-        ArrayList<String> group_user_inheritance = new ArrayList<String>();
-        HashMap<String, Object> group_user_permissions = new HashMap<String, Object>();
-        HashMap<String, Object> group_user_worlds = new HashMap<String, Object>();
-        HashMap<String, Object> group_user_worlds_creative = new HashMap<String, Object>();
-
-        HashMap<String, Object> group_admin = new HashMap<String, Object>();
-        ArrayList<String> group_admin_inheritance = new ArrayList<String>();
-        HashMap<String, Object> group_admin_permissions = new HashMap<String, Object>();
-
-        messages.put("build", "&cYou do not have permission to build here.");
-
-        user_permissions.put("permissions.example", true);
-        user_groups.add("admin");
-        user.put("permissions", user_permissions);
-        user.put("groups", user_groups);
-        users.put("ConspiracyWizard", user);
-
-        group_default_permissions.put("permissions.build", false);
-        group_default.put("permissions", group_default_permissions);
-
-        group_user_inheritance.add("default");
-        group_user_permissions.put("permissions.build", true);
-        group_user_worlds_creative.put("coolplugin.item", true);
-        group_user_worlds.put("creative", group_user_worlds_creative);
-        group_user.put("inheritance", group_user_inheritance);
-        group_user.put("permissions", group_user_permissions);
-        group_user.put("worlds", group_user_worlds);
-
-        group_admin_inheritance.add("user");
-        group_admin_permissions.put("permissions.*", true);
-        group_admin.put("inheritance", group_admin_inheritance);
-        group_admin.put("permissions", group_admin_permissions);
-
-        groups.put("default", group_default);
-        groups.put("user", group_user);
-        groups.put("admin", group_admin);
-
-        getConfiguration().setProperty("messages", messages);
-        getConfiguration().setProperty("users", users);
-        getConfiguration().setProperty("groups", groups);
-
-        getConfiguration().setHeader(
-            "# PermissionsBukkit configuration file",
-            "# ",
-            "# A permission node is a string like 'permissions.build', usually starting",
-            "# with the name of the plugin. Refer to a plugin's documentation for what",
-            "# permissions it cares about. Each node should be followed by true to grant",
-            "# that permission or false to revoke it, as in 'permissions.build: true'.",
-            "# Some plugins provide permission nodes that map to a group of permissions -",
-            "# for example, PermissionsBukkit has 'permissions.*', which automatically",
-            "# grants all admin permissions. You can also specify false for permissions",
-            "# of this type.",
-            "# ",
-            "# Users inherit permissions from the groups they are a part of. If a user is",
-            "# not specified here, or does not have a 'groups' node, they will be in the",
-            "# group 'default'. Permissions for individual users may also be specified by",
-            "# using a 'permissions' node with a list of permission nodes, which will",
-            "# override their group permissions. World permissions may be assigned to",
-            "# users with a 'worlds:' entry.",
-            "# ",
-            "# Groups can be assigned to players and all their permissions will also be",
-            "# assigned to those players. Groups can also inherit permissions from other",
-            "# groups. Like user permissions, groups may override the permissions of their",
-            "# parent group(s). Unlike users, groups do NOT automatically inherit from",
-            "# default. World permissions may be assigned to groups with a 'worlds:' entry.",
-            "#",
-            "# The cannot-build message is configurable. If it is left blank, no message",
-            "# will be displayed to the player if PermissionsBukkit prevents them from",
-            "# building, digging, or interacting with a block. Use '&' characters to",
-            "# signify color codes.",
-            "");
-        getConfiguration().save();
     }
 
 }
