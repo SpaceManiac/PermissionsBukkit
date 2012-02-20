@@ -1,11 +1,11 @@
 package com.platymuus.bukkit.permissions;
 
-import java.util.*;
-
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.*;
 
 /**
  * Main class for PermissionsBukkit.
