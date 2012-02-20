@@ -5,6 +5,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -144,7 +146,11 @@ public class PermissionsPlugin extends JavaPlugin {
     }
 
     protected void refreshPermissions() {
-        //getConfiguration().save();
+        try {
+            getConfig().save(new File(getDataFolder(), "config.yml"));
+        } catch (IOException e) {
+            getLogger().warning("Failed to write changed config.yml: " + e.getMessage());
+        }
         for (String player : permissions.keySet()) {
             PermissionAttachment attachment = permissions.get(player);
             for (String key : attachment.getPermissions().keySet()) {
