@@ -23,7 +23,9 @@ public class PermissionsPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         // Write some default configuration
-        saveDefaultConfig();
+        if (!new File(getDataFolder(), "config.yml").exists()) {
+            saveDefaultConfig();
+        }
 
         // Register stuff
         getCommand("permissions").setExecutor(commandExecutor);

@@ -1,8 +1,11 @@
+# basic info
 name: PermissionsBukkit
 main: com.platymuus.bukkit.permissions.PermissionsPlugin
 author: SpaceManiac
 website: http://bukkit.org
-version: 1.5
+version: ${version}
+
+# commands
 commands:
   permissions:
     aliases: [ perms, perm ]
@@ -24,6 +27,8 @@ commands:
         /<command> player removegroup <player> <group> - remove a player from a group.
         /<command> player setperm <player> <[world:]node> [true|false] - set a permission on a player.
         /<command> player unsetperm <player> <[world:]node> - unset a permission on a player.
+
+# permissions
 permissions:
   permissions.*:
     default: op
@@ -91,3 +96,6 @@ permissions:
     description: Allows use of /permissions player setperm.
   permissions.player.unsetperm:
     description: Allows use of /permissions player unsetperm.
+
+# for PhonicUK, a cool guy who doesn't afraid of anything
+MCMAPluginID: D6AF3772-E6F6-4467-8F3A-1E9DB74C7E50

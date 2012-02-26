@@ -23,7 +23,6 @@ class PermissionsCommand implements CommandExecutor {
         this.plugin = plugin;
     }
 
-    @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] split) {
         if (split.length < 1) {
             return !checkPerm(sender, "help") || usage(sender, command);
@@ -55,7 +54,7 @@ class PermissionsCommand implements CommandExecutor {
             } else {
                 boolean set = permissible.isPermissionSet(node), has = permissible.hasPermission(node);
                 String sets = set ? " sets " : " defaults ";
-                String perm = has ? " true" : " false";
+                String perm = has ? "true" : "false";
                 sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + name + ChatColor.GREEN + sets + ChatColor.WHITE + node + ChatColor.GREEN + " to " + ChatColor.WHITE + perm + ChatColor.GREEN + ".");
             }
             return true;
@@ -418,13 +417,11 @@ class PermissionsCommand implements CommandExecutor {
     }
 
     private void createPlayerNode(String player, String subnode) {
-        HashMap<String, Object> empty = new HashMap<String, Object>();
-        plugin.getNode("users." + player).set(subnode, empty);
+        plugin.getConfig().createSection("users." + player + "." + subnode);
     }
 
     private void createGroupNode(String group, String subnode) {
-        HashMap<String, Object> empty = new HashMap<String, Object>();
-        plugin.getNode("groups." + group).set(subnode, empty);
+        plugin.getConfig().createSection("groups." + group + "." + subnode);
     }
     
     // -- utilities --
