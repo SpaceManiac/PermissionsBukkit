@@ -1,11 +1,11 @@
 package com.platymuus.bukkit.permissions;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A class representing a permissions group.
@@ -28,7 +28,7 @@ public class Group {
         ArrayList<String> result = new ArrayList<String>();
         if (plugin.getNode("users") != null) {
             for (String user : plugin.getNode("users").getKeys(false)) {
-                for (String group : plugin.getNode("users." + user).getStringList("groups")) {
+                for (String group : plugin.getNode("users/" + user).getStringList("groups")) {
                     if (name.equalsIgnoreCase(group) && !result.contains(user)) {
                         result.add(user);
                     }
@@ -50,7 +50,7 @@ public class Group {
     }
 
     public PermissionInfo getInfo() {
-        ConfigurationSection node = plugin.getNode("groups." + name);
+        ConfigurationSection node = plugin.getNode("groups/" + name);
         if (node == null) {
             return null;
         }

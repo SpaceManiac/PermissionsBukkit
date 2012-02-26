@@ -1,8 +1,8 @@
 package com.platymuus.bukkit.permissions;
 
-import java.util.*;
-
 import org.bukkit.configuration.ConfigurationSection;
+
+import java.util.*;
 
 /**
  * A class representing the global and world nodes attached to a player or group.
@@ -61,7 +61,7 @@ public class PermissionInfo {
      * @return The map of permissions.
      */
     public Map<String, Boolean> getWorldPermissions(String world) {
-        return plugin.getAllPerms(node.getName() + ":" + world, node.getName() + ".world." + world);
+        return plugin.getAllPerms(node.getName() + ":" + world, node.getName() + "/world/" + world);
     }
     
 }
