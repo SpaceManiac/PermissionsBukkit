@@ -19,7 +19,6 @@ public class PermissionsPlugin extends JavaPlugin {
     private PlayerListener playerListener = new PlayerListener(this);
     private PermissionsCommand commandExecutor = new PermissionsCommand(this);
     private HashMap<String, PermissionAttachment> permissions = new HashMap<String, PermissionAttachment>();
-    private HashMap<String, String> lastWorld = new HashMap<String, String>();
     
     private File configFile;
     private YamlConfiguration config;
@@ -27,12 +26,11 @@ public class PermissionsPlugin extends JavaPlugin {
     // -- Basic stuff
     @Override
     public void onEnable() {
-        // Write some default configuration
+        // Take care of configuration
         configFile = new File(getDataFolder(), "config.yml");
         if (!configFile.exists()) {
             saveDefaultConfig();
         }
-
         reloadConfig();
 
         // Register stuff
@@ -145,7 +143,7 @@ public class PermissionsPlugin extends JavaPlugin {
         }
         PermissionAttachment attachment = player.addAttachment(this);
         permissions.put(player.getName(), attachment);
-        setLastWorld(player.getName(), player.getWorld().getName());
+        calculateAttachment(player);
     }
 
     protected void unregisterPlayer(Player player) {
@@ -157,23 +155,14 @@ public class PermissionsPlugin extends JavaPlugin {
                 debug("Unregistering " + player.getName() + ": player did not have attachment");
             }
             permissions.remove(player.getName());
-            lastWorld.remove(player.getName());
         } else {
             debug("Unregistering " + player.getName() + ": was not registered");
         }
     }
 
-    protected void setLastWorld(String player, String world) {
-        if (permissions.containsKey(player) && (lastWorld.get(player) == null || !lastWorld.get(player).equals(world))) {
-            debug("Player " + player + " moved to world " + world + ", recalculating...");
-            lastWorld.put(player, world);
-            calculateAttachment(getServer().getPlayer(player));
-        }
-    }
-
     protected void refreshPermissions() {
         try {
-            getConfig().save(new File(getDataFolder(), "config.yml"));
+            getConfig().save(configFile);
         } catch (IOException e) {
             getLogger().warning("Failed to write changed config.yml: " + e.getMessage());
         }
@@ -230,9 +219,7 @@ public class PermissionsPlugin extends JavaPlugin {
         }
     }
 
-    // -- Private stuff
-
-    private void calculateAttachment(Player player) {
+    protected void calculateAttachment(Player player) {
         if (player == null) {
             return;
         }
@@ -241,17 +228,19 @@ public class PermissionsPlugin extends JavaPlugin {
             debug("Calculating permissions on " + player.getName() + ": attachment was null");
             return;
         }
-        
+
         for (String key : attachment.getPermissions().keySet()) {
             attachment.unsetPermission(key);
         }
 
-        for (Map.Entry<String, Boolean> entry : calculatePlayerPermissions(player.getName().toLowerCase(), lastWorld.get(player.getName())).entrySet()) {
+        for (Map.Entry<String, Boolean> entry : calculatePlayerPermissions(player.getName().toLowerCase(), player.getWorld().getName()).entrySet()) {
             attachment.setPermission(entry.getKey(), entry.getValue());
         }
 
         player.recalculatePermissions();
     }
+
+    // -- Private stuff
 
     private Map<String, Boolean> calculatePlayerPermissions(String player, String world) {
         if (getNode("users/" + player) == null) {
@@ -263,7 +252,7 @@ public class PermissionsPlugin extends JavaPlugin {
                 getAllPerms("user " + player, "users/" + player + "/permissions");
 
         if (getNode("users/" + player + "/worlds/" + world) != null) {
-            for (Map.Entry<String, Boolean> entry : getAllPerms("user" + player, "users/" + player + "/worlds/" + world).entrySet()) {
+            for (Map.Entry<String, Boolean> entry : getAllPerms("user " + player, "users/" + player + "/worlds/" + world).entrySet()) {
                 // No containskey; world overrides non-world
                 perms.put(entry.getKey(), entry.getValue());
             }

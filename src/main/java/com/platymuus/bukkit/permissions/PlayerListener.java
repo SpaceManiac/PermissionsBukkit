@@ -22,13 +22,13 @@ class PlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onWorldChange(PlayerChangedWorldEvent event) {
-        plugin.setLastWorld(event.getPlayer().getName(), event.getPlayer().getWorld().getName());
+        plugin.calculateAttachment(event.getPlayer());
     }
     
     // Register players when needed
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerLogin(PlayerLoginEvent event) {
+    public void onPlayerLogin(PlayerJoinEvent event) {
         plugin.debug("Player " + event.getPlayer().getName() + " joined, registering...");
         plugin.registerPlayer(event.getPlayer());
     }

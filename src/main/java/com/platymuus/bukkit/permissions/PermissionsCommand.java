@@ -5,6 +5,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.Permission;
@@ -211,11 +212,8 @@ class PermissionsCommand implements CommandExecutor {
             if (plugin.getNode("groups/" + group + "/" + node) == null) {
                 createGroupNode(group, node);
             }
-            
-            Map<String, Object> list = plugin.getNode("groups/" + group + "/" + node).getValues(false);
-            list.put(perm, value);
-            plugin.getNode("groups/" + group).set(node, list);
-            
+
+            plugin.getNode("groups/" + group + "/" + node).set(perm, value);
             plugin.refreshPermissions();
             
             sender.sendMessage(ChatColor.GREEN + "Group " + ChatColor.WHITE + group + ChatColor.GREEN + " now has " + ChatColor.WHITE + perm + ChatColor.GREEN + " = " + ChatColor.WHITE + value + ChatColor.GREEN + ".");
@@ -237,18 +235,16 @@ class PermissionsCommand implements CommandExecutor {
                 perm = perm.substring(perm.indexOf(':') + 1);
                 node = "worlds/" + world;
             }
-            if (plugin.getNode("groups/" + group + "." + node) == null) {
+            if (plugin.getNode("groups/" + group + "/" + node) == null) {
                 createGroupNode(group, node);
             }
-            
-            Map<String, Boolean> list = plugin.getAllPerms("group " + group, "groups/" + group + "/" + node);
-            if (!list.containsKey(perm)) {
+
+            ConfigurationSection sec = plugin.getNode("groups/" + group + "/" + node);
+            if (!sec.contains(perm)) {
                 sender.sendMessage(ChatColor.GREEN + "Group " + ChatColor.WHITE + group + ChatColor.GREEN + " did not have " + ChatColor.WHITE + perm + ChatColor.GREEN + " set.");
                 return true;
             }
-            list.remove(perm);
-            plugin.getNode("groups/" + group).set(node, list);
-            
+            sec.set(perm, null);
             plugin.refreshPermissions();
             
             sender.sendMessage(ChatColor.GREEN + "Group " + ChatColor.WHITE + group + ChatColor.GREEN + " no longer has " + ChatColor.WHITE + perm + ChatColor.GREEN + " set.");
@@ -359,11 +355,8 @@ class PermissionsCommand implements CommandExecutor {
             if (plugin.getNode("users/" + player + "/" + node) == null) {
                 createPlayerNode(player, node);
             }
-            
-            Map<String, Boolean> list = plugin.getAllPerms("user " + player, "users/" + player + "/" + node);
-            list.put(perm, value);
-            plugin.getNode("users/" + player).set(node, list);
-            
+
+            plugin.getNode("users/" + player + "/" + node).set(perm, value);
             plugin.refreshPermissions();
             
             sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + player + ChatColor.GREEN + " now has " + ChatColor.WHITE + perm + ChatColor.GREEN + " = " + ChatColor.WHITE + value + ChatColor.GREEN + ".");
@@ -387,15 +380,13 @@ class PermissionsCommand implements CommandExecutor {
             if (plugin.getNode("users/" + player + "/" + node) == null) {
                 createPlayerNode(player, node);
             }
-            
-            Map<String, Boolean> list = plugin.getAllPerms("user " + player, "users/" + player + "/" + node);
-            if (!list.containsKey(perm)) {
+
+            ConfigurationSection sec = plugin.getNode("users/" + player + "/" + node);
+            if (!sec.contains(perm)) {
                 sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + player + ChatColor.GREEN + " did not have " + ChatColor.WHITE + perm + ChatColor.GREEN + " set.");
                 return true;
             }
-            list.remove(perm);
-            plugin.getNode("users/" + player).set(node, list);
-            
+            sec.set(perm, null);
             plugin.refreshPermissions();
             
             sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + player + ChatColor.GREEN + " no longer has " + ChatColor.WHITE + perm + ChatColor.GREEN + " set.");
@@ -406,14 +397,8 @@ class PermissionsCommand implements CommandExecutor {
     }
 
     private void createPlayerNode(String player) {
-        ArrayList<String> groups = new ArrayList<String>();
-        groups.add("default");
-        HashMap<String, Object> user = new HashMap<String, Object>();
-        user.put("groups", groups);
-        if (plugin.getNode("users") == null) {
-            plugin.getConfig().set("users", new HashMap<String, Object>());
-        }
-        plugin.getNode("users").set(player, user);
+        plugin.getNode("users").createSection(player);
+        plugin.getNode("users/" + player).set("groups", Arrays.asList("default"));
     }
 
     private void createPlayerNode(String player, String subnode) {
