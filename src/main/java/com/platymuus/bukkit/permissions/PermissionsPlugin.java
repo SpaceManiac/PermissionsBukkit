@@ -191,9 +191,33 @@ public class PermissionsPlugin extends JavaPlugin {
         
         int failures = 0;
         String firstFailure = "";
-        
-        Set<String> keys = node.getKeys(false);
-        for (String key : keys) {
+
+        // Make an attempt to autofix incorrect nesting
+        boolean fixed = false, fixedNow = true;
+        while (fixedNow) {
+            fixedNow = false;
+            for (String key : node.getKeys(true)) {
+                if (node.isBoolean(key) && key.contains("/")) {
+                    node.set(key.replace("/", "."), node.getBoolean(key));
+                    node.set(key, null);
+                    fixed = fixedNow = true;
+                } else if (node.isConfigurationSection(key) && node.getConfigurationSection(key).getKeys(true).size() == 0) {
+                    node.set(key, null);
+                    fixed = fixedNow = true;
+                }
+            }
+        }
+        if (fixed) {
+            getLogger().info("Fixed broken nesting in " + desc + ".");
+            try {
+                getConfig().save(configFile);
+            } catch (IOException e) {
+                getLogger().warning("Failed to write changed config.yml: " + e.getMessage());
+            }
+        }
+
+        // Do the actual getting of permissions
+        for (String key : node.getKeys(false)) {
             if (node.isBoolean(key)) {
                 result.put(key, node.getBoolean(key));
             } else {
@@ -252,7 +276,7 @@ public class PermissionsPlugin extends JavaPlugin {
                 getAllPerms("user " + player, "users/" + player + "/permissions");
 
         if (getNode("users/" + player + "/worlds/" + world) != null) {
-            for (Map.Entry<String, Boolean> entry : getAllPerms("user " + player, "users/" + player + "/worlds/" + world).entrySet()) {
+            for (Map.Entry<String, Boolean> entry : getAllPerms("user " + player + " world " + world, "users/" + player + "/worlds/" + world).entrySet()) {
                 // No containskey; world overrides non-world
                 perms.put(entry.getKey(), entry.getValue());
             }
@@ -280,7 +304,7 @@ public class PermissionsPlugin extends JavaPlugin {
         
 
         if (getNode("groups/" + group + "/worlds/" + world) != null) {
-            for (Map.Entry<String, Boolean> entry : getAllPerms("group " + group, "groups/" + group + "/worlds/" + world).entrySet()) {
+            for (Map.Entry<String, Boolean> entry : getAllPerms("group " + group + " world " + world, "groups/" + group + "/worlds/" + world).entrySet()) {
                 // No containskey; world overrides non-world
                 perms.put(entry.getKey(), entry.getValue());
             }
