@@ -34,4 +34,10 @@
             <scope>compile</scope>
         </dependency>
     </dependencies>
+    <repositories>
+        <repository>
+            <id>bukkit-rep</id>
+            <url>http://repo.bukkit.org/content/groups/public</url>
+        </repository>
+    </repositories>
 </project>
