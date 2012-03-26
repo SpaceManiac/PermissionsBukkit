@@ -48,7 +48,7 @@ class PlayerListener implements Listener {
         plugin.unregisterPlayer(event.getPlayer());
     }
     
-    // Prevent doing things in the event of permissions.build: false
+    // Prevent doing things in the event of permissions.build: false and permissions.interact: false
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
@@ -56,7 +56,7 @@ class PlayerListener implements Listener {
         if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_AIR) {
             return;
         }
-        if (!event.getPlayer().hasPermission("permissions.build")) {
+        if (!event.getPlayer().hasPermission("permissions.build")&&!event.getPlayer().hasPermission("permissions.interact")) {
             bother(event.getPlayer());
             event.setCancelled(true);
         }
