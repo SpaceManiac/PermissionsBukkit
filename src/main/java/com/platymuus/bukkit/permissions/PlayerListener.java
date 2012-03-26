@@ -77,8 +77,8 @@ class PlayerListener implements Listener {
     }
     
     private void bother(Player player) {
-        if (plugin.getConfig().getString("messages.build", "").length() > 0) {
-            String message = plugin.getConfig().getString("messages.build", "").replace('&', '\u00A7');
+        if (plugin.getConfig().getString("messages/build", "").length() > 0) {
+            String message = plugin.getConfig().getString("messages/build", "").replace('&', '\u00A7');
             player.sendMessage(message);
         }
     }
