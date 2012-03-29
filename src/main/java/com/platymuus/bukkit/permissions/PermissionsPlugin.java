@@ -186,7 +186,8 @@ public class PermissionsPlugin extends JavaPlugin {
     }
 
     protected HashMap<String, Boolean> getAllPerms(String desc, String path) {
-        HashMap<String, Boolean> result = new HashMap<String, Boolean>();
+		// Use *ordered* hash
+		HashMap<String, Boolean> result = new LinkedHashMap<String, Boolean>();
         ConfigurationSection node = getNode(path);
         
         int failures = 0;
@@ -242,59 +243,84 @@ public class PermissionsPlugin extends JavaPlugin {
 
     // -- Private stuff
 
-    private Map<String, Boolean> calculatePlayerPermissions(String player, String world) {
-        if (getNode("users/" + player) == null) {
-            return calculateGroupPermissions("default", world);
-        }
+	private Map<String, Boolean> calculatePlayerPermissions( String player, String world ) {
+		// Make player node name once as a single edit point. While unlikely, it might change.
+		String playerNode = "users/" + player;
+		Map<String, Boolean> perms = new LinkedHashMap<String, Boolean>();
 
-        Map<String, Boolean> perms = getNode("users/" + player + "/permissions") == null ?
-                new HashMap<String, Boolean>() :
-                getAllPerms("user " + player, "users/" + player + "/permissions");
+		if ( getNode( playerNode ) == null ) {
+			perms = calculateGroupPermissions( "default", world );
+		}
+		else {
+			/*
+			 * Create a blank *ordered* hash and populate with group permissions.
+			 */
+			List<String> playerGroups = getNode( playerNode ).getStringList( "groups" );
 
-        if (getNode("users/" + player + "/worlds/" + world) != null) {
-            for (Map.Entry<String, Boolean> entry : getAllPerms("user " + player, "users/" + player + "/worlds/" + world).entrySet()) {
-                // No containskey; world overrides non-world
-                perms.put(entry.getKey(), entry.getValue());
-            }
-        }
+			/*
+			 * Current group precedence is from last to first. (i.e. permissions in last group in list overrides permissions
+			 * in any predecessors). If precedence should be from first to last, uncomment the following line.
+			 */
+			// Collections.reverse( playerGroups );
 
-        for (String group : getNode("users/" + player).getStringList("groups")) {
-            for (Map.Entry<String, Boolean> entry : calculateGroupPermissions(group, world).entrySet()) {
-                if (!perms.containsKey(entry.getKey())) { // User overrides group
-                    perms.put(entry.getKey(), entry.getValue());
-                }
-            }
-        }
+			for ( String group : playerGroups ) {
+				perms.putAll( calculateGroupPermissions( group, world ) );
+			}
 
-        return perms;
-    }
+			/*
+			 * Overlay any player-specific permissions onto permission list, if they exist.
+			 */
 
-    private Map<String, Boolean> calculateGroupPermissions(String group, String world) {
-        if (getNode("groups/" + group) == null) {
-            return new HashMap<String, Boolean>();
-        }
+			if ( getNode( playerNode + "/permissions" ) != null )
+				perms.putAll( getAllPerms( playerNode, playerNode + "/permissions" ) );
 
-        Map<String, Boolean> perms = getNode("groups/" + group + "/permissions") == null ?
-                new HashMap<String, Boolean>() :
-                getAllPerms("group " + group, "groups/" + group + "/permissions");
-        
+			/*
+			 * Overlay any user world-specific permissions onto permissions list, if they exist.
+			 */
 
-        if (getNode("groups/" + group + "/worlds/" + world) != null) {
-            for (Map.Entry<String, Boolean> entry : getAllPerms("group " + group, "groups/" + group + "/worlds/" + world).entrySet()) {
-                // No containskey; world overrides non-world
-                perms.put(entry.getKey(), entry.getValue());
-            }
-        }
+			if ( getNode( playerNode + "/worlds/" + world ) != null )
+				perms.putAll( getAllPerms( playerNode, playerNode + "/worlds/" + world ) );
+		}
 
-        for (String parent : getNode("groups/" + group).getStringList("inheritance")) {
-            for (Map.Entry<String, Boolean> entry : calculateGroupPermissions(parent, world).entrySet()) {
-                if (!perms.containsKey(entry.getKey())) { // Children override permissions
-                    perms.put(entry.getKey(), entry.getValue());
-                }
-            }
-        }
+		return perms;
+	}
 
-        return perms;
-    }
 
+	private Map<String, Boolean> calculateGroupPermissions( String group, String world ) {
+		// Make group node name once as a single edit point. While unlikely, it might change.
+		String groupNode = "groups/" + group;
+
+		// Blank *ordered* group permissions list
+		HashMap<String, Boolean> perms = new LinkedHashMap<String, Boolean>();
+
+		if ( getNode( groupNode ) == null ) {
+			return perms;
+		}
+
+		List<String> groupAncestors = getNode( groupNode ).getStringList( "inheritance" );
+		/*
+		 * Current inheritance precedence is from last to first. (i.e. permissions in last inherited group overrides
+		 * permissions in any predecessors). If precedence should be from first to last, uncomment the following line.
+		 */
+		// Collections.reverse( groupAncestors );
+
+		for ( String ancestor : groupAncestors ) {
+			perms.putAll( calculateGroupPermissions( ancestor, world ) );
+		}
+
+		/*
+		 * Overlay any group-specific permissions onto permission list, if they exist.
+		 */
+
+		if ( getNode( groupNode + "/permissions" ) != null )
+			perms.putAll( getAllPerms( groupNode, groupNode + "/permissions" ) );
+
+		/*
+		 * Overlay any group world-specific permissions onto permissions list, if they exist.
+		 */
+		if ( getNode( groupNode + "/worlds/" + world ) != null )
+			perms.putAll( getAllPerms( groupNode, groupNode + "/worlds/" + world ) );
+
+		return perms;
+	}
 }
