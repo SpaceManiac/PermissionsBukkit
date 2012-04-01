@@ -1,5 +1,7 @@
 package com.platymuus.bukkit.permissions;
 
+import java.util.Arrays;
+
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -28,11 +30,19 @@ class PlayerListener implements Listener {
     // Register players when needed
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerLogin(PlayerJoinEvent event) {
-        plugin.debug("Player " + event.getPlayer().getName() + " joined, registering...");
-        plugin.registerPlayer(event.getPlayer());
+    public void onPlayerLogin(PlayerJoinEvent event) {    	
+        plugin.debug("Player " + event.getPlayer().getName() + " joined, registering...");    
+        plugin.registerPlayer(event.getPlayer());       
     }
-
+    
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerFirstLogin(PlayerJoinEvent event) {
+    	final String player = event.getPlayer().getPlayerListName().toLowerCase();
+    	if (plugin.getNode("users/" + player) == null) {   	
+        createPlayerNode(player);
+        plugin.refreshPermissions();
+    	}
+    }
     // Unregister players when needed
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -87,4 +97,14 @@ class PlayerListener implements Listener {
         }
     }
 
+	private void createPlayerNode(String player) {
+		plugin.getNode("users").createSection(player);
+		plugin.getNode("users/" + player).set("groups",
+				Arrays.asList("default"));
+	}
+
+	@SuppressWarnings("unused")
+	private void createPlayerNode(String player, String subnode) {
+		plugin.getConfig().createSection("users/" + player + "/" + subnode);
+	}
 }
