@@ -18,6 +18,7 @@ public class PermissionsPlugin extends JavaPlugin {
 
     private PlayerListener playerListener = new PlayerListener(this);
     private PermissionsCommand commandExecutor = new PermissionsCommand(this);
+    private PermissionsRanker rankExecutor = new PermissionsRanker(this);
     private HashMap<String, PermissionAttachment> permissions = new HashMap<String, PermissionAttachment>();
     
     private File configFile;
@@ -35,6 +36,7 @@ public class PermissionsPlugin extends JavaPlugin {
 
         // Register stuff
         getCommand("permissions").setExecutor(commandExecutor);
+        getCommand("setrank").setExecutor(rankExecutor);
         getServer().getPluginManager().registerEvents(playerListener, this);
 
         // Register everyone online right now
@@ -296,5 +298,4 @@ public class PermissionsPlugin extends JavaPlugin {
 
         return perms;
     }
-
 }
