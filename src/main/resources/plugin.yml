@@ -2,11 +2,13 @@
 name: PermissionsBukkit
 main: com.platymuus.bukkit.permissions.PermissionsPlugin
 author: SpaceManiac
-website: http://bukkit.org
 version: ${version}
 
 # commands
 commands:
+  setrank:
+    aliases: [ rank, ranker ]
+    description: Commands for manipulating permissions.
   permissions:
     aliases: [ perms, perm ]
     description: Commands for manipulating permissions.
