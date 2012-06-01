@@ -2,7 +2,7 @@
 name: PermissionsBukkit
 main: com.platymuus.bukkit.permissions.PermissionsPlugin
 author: SpaceManiac
-website: http://bukkit.org
+website: http://dev.bukkit.org/server-mods/permbukkit/
 version: ${version}
 
 # commands
