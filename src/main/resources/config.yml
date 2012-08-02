@@ -52,3 +52,5 @@ groups:
         - default
 messages:
     build: '&cYou do not have permission to build here.'
+
+debug: false
