@@ -402,11 +402,55 @@ class PermissionsCommand implements CommandExecutor {
     }
 
     private void createPlayerNode(String player, String subnode) {
-        plugin.getConfig().createSection("users/" + player + "/" + subnode);
+        String[] subnodes = subnode.split("/");
+        
+        ConfigurationSection sec = plugin.getNode("users");
+        if (sec == null) {
+            sec = plugin.getConfig().createSection("users");
+        }
+        ConfigurationSection playersec = plugin.getNode(sec.getCurrentPath()+"/"+player);
+        if (playersec == null)
+        {
+            playersec = sec.createSection(player);
+        }
+        sec = playersec;
+        
+        for(int c = 0; c < subnodes.length; c++)
+        {
+            
+                ConfigurationSection testnode = plugin.getNode(sec.getCurrentPath()+"/"+subnodes[c]);
+                if (testnode == null)
+                {
+                    testnode = sec.createSection(subnodes[c]);
+                }
+                sec = testnode;
+        }
     }
 
     private void createGroupNode(String group, String subnode) {
-        plugin.getConfig().createSection("groups/" + group + "/" + subnode);
+        String[] subnodes = subnode.split("/");
+        
+        ConfigurationSection sec = plugin.getNode("groups");
+        if (sec == null) {
+            sec = plugin.getConfig().createSection("groups");
+        }
+        ConfigurationSection groupsec = plugin.getNode(sec.getCurrentPath()+"/"+group);
+        if (groupsec == null)
+        {
+            groupsec = sec.createSection(group);
+        }
+        sec = groupsec;
+        
+        for(int c = 0; c < subnodes.length; c++)
+        {
+            
+                ConfigurationSection testnode = plugin.getNode(sec.getCurrentPath()+"/"+subnodes[c]);
+                if (testnode == null)
+                {
+                    testnode = sec.createSection(subnodes[c]);
+                }
+                sec = testnode;
+        }
     }
     
     // -- utilities --
