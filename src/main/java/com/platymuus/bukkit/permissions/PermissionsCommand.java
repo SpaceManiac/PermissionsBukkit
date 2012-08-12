@@ -397,16 +397,16 @@ class PermissionsCommand implements CommandExecutor {
     }
 
     private void createPlayerNode(String player) {
-        plugin.getNode("users").createSection(player);
+        plugin.createNode("users/" + player);
         plugin.getNode("users/" + player).set("groups", Arrays.asList("default"));
     }
 
     private void createPlayerNode(String player, String subnode) {
-        plugin.getConfig().createSection("users/" + player + "/" + subnode);
+        plugin.createNode("users/" + player + "/" + subnode);
     }
 
     private void createGroupNode(String group, String subnode) {
-        plugin.getConfig().createSection("groups/" + group + "/" + subnode);
+        plugin.createNode("groups/" + group + "/" + subnode);
     }
     
     // -- utilities --

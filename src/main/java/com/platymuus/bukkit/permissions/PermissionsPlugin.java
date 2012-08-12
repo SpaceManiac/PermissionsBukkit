@@ -185,6 +185,17 @@ public class PermissionsPlugin extends JavaPlugin {
         return null;
     }
 
+    protected void createNode(String node) {
+        ConfigurationSection sec = getConfig();
+        for (String piece : node.split("/")) {
+            ConfigurationSection sec2 = getNode(sec == getConfig() ? piece : sec.getCurrentPath() + "/" + piece);
+            if (sec2 == null) {
+                sec2 = sec.createSection(piece);
+            }
+            sec = sec2;
+        }
+    }
+
     protected HashMap<String, Boolean> getAllPerms(String desc, String path) {
         HashMap<String, Boolean> result = new HashMap<String, Boolean>();
         ConfigurationSection node = getNode(path);
