@@ -9,7 +9,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Main class for PermissionsBukkit.
@@ -43,7 +47,13 @@ public class PermissionsPlugin extends JavaPlugin {
         }
 
         // How are you gentlemen
-        getLogger().info("Enabled successfully, " + getServer().getOnlinePlayers().length + " players registered");
+        int count = getServer().getOnlinePlayers().length;
+        if (count > 0) {
+            getLogger().info("Enabled successfully, " + count + " online players registered");
+        } else {
+            // "0 players registered" sounds too much like an error
+            getLogger().info("Enabled successfully");
+        }
     }
 
     @Override
@@ -57,8 +67,20 @@ public class PermissionsPlugin extends JavaPlugin {
         config.options().pathSeparator('/');
         try {
             config.load(configFile);
-        } catch (Exception e) {
-            getLogger().severe("Unable to load configuration!");
+        } catch (Exception ex) {
+            getLogger().log(Level.SEVERE, "Failed to load configuration", ex);
+        }
+    }
+
+    @Override
+    public void saveConfig() {
+        // If there's no keys (such as in the event of a load failure) don't save
+        if (config.getKeys(true).size() > 0) {
+            try {
+                config.save(configFile);
+            } catch (IOException ex) {
+                getLogger().log(Level.SEVERE, "Failed to save configuration", ex);
+            }
         }
     }
 
@@ -70,7 +92,10 @@ public class PermissionsPlugin extends JavaPlugin {
         }
 
         // Good day to you! I said good day!
-        getLogger().info("Disabled successfully, " + getServer().getOnlinePlayers().length + " players unregistered");
+        int count = getServer().getOnlinePlayers().length;
+        if (count > 0) {
+            getLogger().info("Disabled successfully, " + count + " online players unregistered");
+        }
     }
 
     // -- External API
@@ -161,11 +186,7 @@ public class PermissionsPlugin extends JavaPlugin {
     }
 
     protected void refreshPermissions() {
-        try {
-            getConfig().save(configFile);
-        } catch (IOException e) {
-            getLogger().warning("Failed to write changed config.yml: " + e.getMessage());
-        }
+        saveConfig();
         for (String player : permissions.keySet()) {
             PermissionAttachment attachment = permissions.get(player);
             for (String key : attachment.getPermissions().keySet()) {
@@ -220,11 +241,7 @@ public class PermissionsPlugin extends JavaPlugin {
         }
         if (fixed) {
             getLogger().info("Fixed broken nesting in " + desc + ".");
-            try {
-                getConfig().save(configFile);
-            } catch (IOException e) {
-                getLogger().warning("Failed to write changed config.yml: " + e.getMessage());
-            }
+            saveConfig();
         }
 
         // Do the actual getting of permissions
