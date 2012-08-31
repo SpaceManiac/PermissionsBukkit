@@ -296,6 +296,7 @@ class PermissionsCommand implements CommandExecutor {
             if (split.length != 4) return usage(sender, command, "player addgroup");
             String player = split[2].toLowerCase();
             String group = split[3];
+            if (!checkPerm(sender, "player.addgroup." + group)) return true;
             
             if (plugin.getNode("users/" + player) == null) {
                 createPlayerNode(player);
@@ -318,6 +319,7 @@ class PermissionsCommand implements CommandExecutor {
             if (split.length != 4) return usage(sender, command, "player removegroup");
             String player = split[2].toLowerCase();
             String group = split[3];
+            if (!checkPerm(sender, "player.removegroup." + group)) return true;
             
             if (plugin.getNode("users/" + player) == null) {
                 createPlayerNode(player);
