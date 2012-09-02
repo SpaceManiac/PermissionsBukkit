@@ -15,6 +15,7 @@ commands:
         /<command> check <node> [player] - check if a player or the sender has a permission (any plugin).
         /<command> info <node> - prints information on a specific permission.
         /<command> dump [player] [page] - prints info about a player's (or the sender's) permissions.
+        /<command> setrank <player> <group> - set a player to be in a group with per-group permissions.
         /<command> group - list group-related commands.
         /<command> group list - list all groups.
         /<command> group players <group> - list players in a group.
@@ -39,6 +40,7 @@ permissions:
       permissions.check: true
       permissions.info: true
       permissions.dump: true
+      permissions.setrank: true
       permissions.group.*: true
       permissions.player.*: true
   permissions.build:

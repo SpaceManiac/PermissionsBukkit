@@ -36,7 +36,7 @@ class PermissionsCommand implements CommandExecutor {
             plugin.refreshPermissions();
             sender.sendMessage(ChatColor.GREEN + "Configuration reloaded.");
             return true;
-        } if (subcommand.equals("check")) {
+        } else if (subcommand.equals("check")) {
             if (!checkPerm(sender, "check")) return true;
             if (split.length != 2 && split.length != 3) return usage(sender, command, subcommand);
             
@@ -138,6 +138,28 @@ class PermissionsCommand implements CommandExecutor {
                     }
                 }
             }
+            return true;
+        } else if (subcommand.equals("rank") || subcommand.equals("setrank")) {
+            if (!checkPerm(sender, "setrank")) return true;
+            if (split.length != 3) return usage(sender, command, subcommand);
+
+            // This is essentially player setgroup with an added check
+            String player = split[1].toLowerCase();
+            String group = split[2];
+
+            if (!sender.hasPermission("permissions.setrank." + group)) {
+                sender.sendMessage(ChatColor.RED + "You do not have permission to add players to " + ChatColor.WHITE + group + ChatColor.RED + ".");
+                return true;
+            }
+
+            if (plugin.getNode("users/" + player) == null) {
+                createPlayerNode(player);
+            }
+
+            plugin.getNode("users/" + player).set("groups", Arrays.asList(group));
+            plugin.refreshPermissions();
+
+            sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + player + ChatColor.GREEN + " is now in " + ChatColor.WHITE + group + ChatColor.GREEN + ".");
             return true;
         } else if (subcommand.equals("group")) {
             if (split.length < 2) {
