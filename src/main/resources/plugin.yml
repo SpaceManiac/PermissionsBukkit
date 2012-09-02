@@ -56,6 +56,8 @@ permissions:
     description: Allows use of /permissions info.
   permissions.dump:
     description: Allows use of /permissions dump.
+  permissions.setrank:
+    description: Allows use of /permissions setrank (also requires per-group permissions).
   permissions.group.*:
     description: Allows use of all /permissions group commands.
     children:
