@@ -6,6 +6,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.mcstats.MetricsLite;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +45,14 @@ public class PermissionsPlugin extends JavaPlugin {
         // Register everyone online right now
         for (Player p : getServer().getOnlinePlayers()) {
             registerPlayer(p);
+        }
+
+        // Metrics are fun!
+        try {
+            new MetricsLite(this).start();
+        }
+        catch (IOException ex) {
+            getLogger().warning("Failed to connect to plugin metrics: " + ex.getMessage());
         }
 
         // How are you gentlemen
