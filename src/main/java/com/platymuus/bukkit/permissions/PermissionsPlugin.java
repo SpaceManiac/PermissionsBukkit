@@ -6,7 +6,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.mcstats.MetricsLite;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,7 +50,7 @@ public class PermissionsPlugin extends JavaPlugin {
 
         // Metrics are fun!
         try {
-            new MetricsLite(this).start();
+            new PermissionsMetrics(this);
         }
         catch (IOException ex) {
             getLogger().warning("Failed to connect to plugin metrics: " + ex.getMessage());
