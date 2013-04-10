@@ -9,10 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 
 /**
@@ -24,7 +21,9 @@ public class PermissionsPlugin extends JavaPlugin {
     private PermissionsCommand commandExecutor = new PermissionsCommand(this);
     private PermissionsTabComplete tabCompleter = new PermissionsTabComplete(this);
     private PermissionsMetrics metrics = new PermissionsMetrics(this);
+
     private HashMap<String, PermissionAttachment> permissions = new HashMap<String, PermissionAttachment>();
+    private HashSet<String> recursionBuffer = new HashSet<String>();
     
     private File configFile;
     private YamlConfiguration config;
@@ -337,9 +336,16 @@ public class PermissionsPlugin extends JavaPlugin {
     }
 
     private Map<String, Boolean> calculateGroupPermissions(String group, String world) {
+        recursionBuffer.clear();
+        return calculateGroupPermissions0(group, world);
+    }
+
+    private Map<String, Boolean> calculateGroupPermissions0(String group, String world) {
         if (getNode("groups/" + group) == null) {
             return new HashMap<String, Boolean>();
         }
+
+        recursionBuffer.add(group);
 
         Map<String, Boolean> perms = getNode("groups/" + group + "/permissions") == null ?
                 new HashMap<String, Boolean>() :
@@ -354,7 +360,11 @@ public class PermissionsPlugin extends JavaPlugin {
         }
 
         for (String parent : getNode("groups/" + group).getStringList("inheritance")) {
-            for (Map.Entry<String, Boolean> entry : calculateGroupPermissions(parent, world).entrySet()) {
+            if (recursionBuffer.contains(parent)) {
+                getLogger().warning("In group " + group + ": recursive inheritance from " + parent);
+                continue;
+            }
+            for (Map.Entry<String, Boolean> entry : calculateGroupPermissions0(parent, world).entrySet()) {
                 if (!perms.containsKey(entry.getKey())) { // Children override permissions
                     perms.put(entry.getKey(), entry.getValue());
                 }
