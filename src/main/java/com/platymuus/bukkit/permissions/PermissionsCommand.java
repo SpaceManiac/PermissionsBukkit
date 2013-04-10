@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachmentInfo;
+import org.bukkit.plugin.PluginDescriptionFile;
 
 import java.util.*;
 
@@ -35,6 +36,30 @@ class PermissionsCommand implements CommandExecutor {
             plugin.reloadConfig();
             plugin.refreshPermissions();
             sender.sendMessage(ChatColor.GREEN + "Configuration reloaded.");
+            return true;
+        } else if (subcommand.equals("about")) {
+            if (!checkPerm(sender, "about")) return true;
+
+            // plugin information
+            PluginDescriptionFile desc = plugin.getDescription();
+            sender.sendMessage(ChatColor.GOLD + desc.getName() + ChatColor.GREEN + " version " + ChatColor.GOLD + desc.getVersion());
+            String auth = desc.getAuthors().get(0);
+            for (int i = 1; i < desc.getAuthors().size(); ++i) {
+                auth += ChatColor.GREEN + ", " + ChatColor.WHITE + desc.getAuthors().get(i);
+            }
+            sender.sendMessage(ChatColor.GREEN + "By " + ChatColor.WHITE + auth);
+            sender.sendMessage(ChatColor.GREEN + "Website: " + ChatColor.WHITE + desc.getWebsite());
+
+            // stats
+            sender.sendMessage(ChatColor.GOLD + "Features Used:");
+            for (Map.Entry<String, String> entry : plugin.getMetrics().summarize(0).entrySet()) {
+                sender.sendMessage("  " + ChatColor.GREEN + entry.getKey() + ": " + ChatColor.WHITE + entry.getValue());
+            }
+            sender.sendMessage(ChatColor.GOLD + "Usage:");
+            for (Map.Entry<String, String> entry : plugin.getMetrics().summarize(1).entrySet()) {
+                sender.sendMessage("  " + ChatColor.GREEN + entry.getKey() + ": " + ChatColor.WHITE + entry.getValue());
+            }
+
             return true;
         } else if (subcommand.equals("check")) {
             if (!checkPerm(sender, "check")) return true;

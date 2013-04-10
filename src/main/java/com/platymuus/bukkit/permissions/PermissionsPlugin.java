@@ -23,6 +23,7 @@ public class PermissionsPlugin extends JavaPlugin {
     private PlayerListener playerListener = new PlayerListener(this);
     private PermissionsCommand commandExecutor = new PermissionsCommand(this);
     private PermissionsTabComplete tabCompleter = new PermissionsTabComplete(this);
+    private PermissionsMetrics metrics = new PermissionsMetrics(this);
     private HashMap<String, PermissionAttachment> permissions = new HashMap<String, PermissionAttachment>();
     
     private File configFile;
@@ -50,7 +51,7 @@ public class PermissionsPlugin extends JavaPlugin {
 
         // Metrics are fun!
         try {
-            new PermissionsMetrics(this);
+            metrics.start();
         }
         catch (IOException ex) {
             getLogger().warning("Failed to connect to plugin metrics: " + ex.getMessage());
@@ -170,6 +171,10 @@ public class PermissionsPlugin extends JavaPlugin {
     }
 
     // -- Plugin stuff
+
+    protected PermissionsMetrics getMetrics() {
+        return metrics;
+    }
     
     protected void registerPlayer(Player player) {
         if (permissions.containsKey(player.getName())) {

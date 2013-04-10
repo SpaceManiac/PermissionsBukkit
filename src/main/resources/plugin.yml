@@ -12,6 +12,7 @@ commands:
     description: Commands for manipulating permissions.
     usage: |
         /<command> reload - reload the configuration from disk.
+        /<command> about - display general information on the plugin.
         /<command> check <node> [player] - check if a player or the sender has a permission (any plugin).
         /<command> info <node> - prints information on a specific permission.
         /<command> dump [player] [page] - prints info about a player's (or the sender's) permissions.
@@ -37,6 +38,7 @@ permissions:
     children:
       permissions.help: true
       permissions.reload: true
+      permissions.about: true
       permissions.check: true
       permissions.info: true
       permissions.dump: true
@@ -50,6 +52,8 @@ permissions:
     description: Allows viewing of usage for /permissions.
   permissions.reload:
     description: Allows use of /permissions reload.
+  permissions.about:
+    description: Allows use of /permissions about.
   permissions.check:
     description: Allows use of /permissions check.
   permissions.info:

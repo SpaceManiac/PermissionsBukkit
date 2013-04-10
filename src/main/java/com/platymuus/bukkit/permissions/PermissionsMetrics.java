@@ -5,6 +5,7 @@ import org.mcstats.Metrics;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,10 +15,16 @@ import java.util.Set;
 public class PermissionsMetrics {
 
     private final PermissionsPlugin plugin;
-    private final Metrics metrics;
 
-    public PermissionsMetrics(PermissionsPlugin plugin) throws IOException {
+    private Metrics metrics;
+    private Metrics.Graph featuresUsed;
+    private Metrics.Graph usage;
+
+    public PermissionsMetrics(PermissionsPlugin plugin) {
         this.plugin = plugin;
+    }
+
+    public void start() throws IOException {
         metrics = new Metrics(plugin);
 
         // don't bother with the rest if it's off
@@ -29,12 +36,29 @@ public class PermissionsMetrics {
         metrics.start();
     }
 
+    public HashMap<String, String> summarize(int type) {
+        Metrics.Graph graph = type == 0 ? featuresUsed : usage;
+
+        HashMap<String, String> result = new HashMap<String, String>();
+        for (Metrics.Plotter plotter : graph.getPlotters()) {
+            String value = "";
+            if (plotter instanceof BooleanPlotter) {
+                value = "" + ((BooleanPlotter) plotter).value();
+            } else {
+                value = "" + plotter.getValue();
+            }
+            result.put(plotter.getColumnName(), value);
+        }
+        return result;
+    }
+
     private ConfigurationSection getSection(String name) {
         return plugin.getConfig().getConfigurationSection(name);
     }
 
     private void setupFeaturesUsed() {
         Metrics.Graph graph = metrics.createGraph("Features Used");
+        featuresUsed = graph;
 
         // Whether any users except ConspiracyWizard have permissions set on them
         graph.addPlotter(new BooleanPlotter("Per-user permissions") {
@@ -182,12 +206,13 @@ public class PermissionsMetrics {
 
     private void setupUsage() {
         Metrics.Graph graph = metrics.createGraph("Usage");
+        usage = graph;
 
         // Users in the config
         graph.addPlotter(new Metrics.Plotter("Users") {
             @Override
             public int getValue() {
-                ConfigurationSection sec = getSection("groups");
+                ConfigurationSection sec = getSection("users");
                 return sec == null ? 0 : sec.getKeys(false).size();
             }
         });
@@ -196,7 +221,7 @@ public class PermissionsMetrics {
         graph.addPlotter(new Metrics.Plotter("Groups") {
             @Override
             public int getValue() {
-                ConfigurationSection sec = getSection("users");
+                ConfigurationSection sec = getSection("groups");
                 return sec == null ? 0 : sec.getKeys(false).size();
             }
         });
@@ -231,6 +256,45 @@ public class PermissionsMetrics {
                     }
                 }
                 return total;
+            }
+        });
+
+        graph.addPlotter(new Metrics.Plotter("Permission Roots") {
+            @Override
+            public int getValue() {
+                Set<String> roots = new HashSet<String>();
+                fill(roots, getSection("groups"));
+                fill(roots, getSection("users"));
+                return roots.size();
+            }
+
+            private void fill(Set<String> results, ConfigurationSection section) {
+                if (section == null) return;
+
+                for (String key : section.getKeys(false)) {
+                    if (section.isConfigurationSection(key)) {
+                        ConfigurationSection individual = section.getConfigurationSection(key);
+
+                        if (individual.isConfigurationSection("permissions")) {
+                            for (String node : individual.getConfigurationSection("permissions").getKeys(false)) {
+                                int i = node.indexOf('.');
+                                results.add(i >= 0 ? node.substring(0, i) : node);
+                            }
+                        }
+
+                        if (individual.isConfigurationSection("worlds")) {
+                            ConfigurationSection worlds = individual.getConfigurationSection("worlds");
+                            for (String world : worlds.getKeys(false)) {
+                                if (worlds.isConfigurationSection(world)) {
+                                    for (String node : worlds.getConfigurationSection(world).getKeys(false)) {
+                                        int i = node.indexOf('.');
+                                        results.add(i >= 0 ? node.substring(0, i) : node);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         });
 

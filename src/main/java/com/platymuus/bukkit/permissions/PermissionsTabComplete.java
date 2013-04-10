@@ -16,7 +16,7 @@ import java.util.*;
 public class PermissionsTabComplete implements TabCompleter {
 
     private final List<String> BOOLEAN = ImmutableList.of("true", "false");
-    private final List<String> ROOT_SUBS = ImmutableList.of("reload", "check", "info", "dump", "rank", "setrank", "group", "player");
+    private final List<String> ROOT_SUBS = ImmutableList.of("reload", "about", "check", "info", "dump", "rank", "setrank", "group", "player");
     private final List<String> GROUP_SUBS = ImmutableList.of("list", "players", "setperm", "unsetperm");
     private final List<String> PLAYER_SUBS = ImmutableList.of("setgroup", "addgroup", "removegroup", "setperm", "unsetperm");
 
