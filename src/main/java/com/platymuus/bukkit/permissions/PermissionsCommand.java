@@ -102,6 +102,16 @@ class PermissionsCommand implements CommandExecutor {
                 if (perm.getChildren() != null && perm.getChildren().size() > 0) {
                     sender.sendMessage(ChatColor.GREEN + "Children: " + ChatColor.WHITE + perm.getChildren().size());
                 }
+                if (perm.getPermissibles() != null && perm.getPermissibles().size() > 0) {
+                    int num = 0, numTrue = 0;
+                    for (Permissible who : perm.getPermissibles()) {
+                        ++num;
+                        if (who.hasPermission(perm)) {
+                            ++numTrue;
+                        }
+                    }
+                    sender.sendMessage(ChatColor.GREEN + "Set on: " + ChatColor.WHITE + num + ChatColor.GREEN + " (" + ChatColor.WHITE + numTrue + ChatColor.GREEN + " true)");
+                }
             }
             return true;
         } else if (subcommand.equals("dump")) {
