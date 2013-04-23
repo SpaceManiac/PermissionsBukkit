@@ -161,16 +161,23 @@ class PermissionsCommand implements CommandExecutor {
                 
                 ChatColor g = ChatColor.GREEN, w = ChatColor.WHITE, r = ChatColor.RED;
                 
-                int start = 8 * (page - 1);
-                sender.sendMessage(ChatColor.RED + "[==== " + ChatColor.GREEN + "Page " + page + " of " + numpages + ChatColor.RED + " ====]");
-                for (int i = start; i < start + 8 && i < dump.size(); ++i) {
-                    PermissionAttachmentInfo info = dump.get(i);
-                    
-                    if (info.getAttachment() == null) {
-                        sender.sendMessage(g + "Node " + w + info.getPermission() + g + "=" + w + info.getValue() + g + " (" + r + "default" + g + ")");
-                    } else {
-                        sender.sendMessage(g + "Node " + w + info.getPermission() + g + "=" + w + info.getValue() + g + " (" + w + info.getAttachment().getPlugin().getDescription().getName() + g + ")");
+                if (sender instanceof Player) {
+                
+                	int start = 8 * (page - 1);
+                	sender.sendMessage(ChatColor.RED + "[==== " + ChatColor.GREEN + "Page " + page + " of " + numpages + ChatColor.RED + " ====]");
+                	for (int i = start; i < start + 8 && i < dump.size(); ++i) {
+                		PermissionAttachmentInfo info = dump.get(i);
+                    	if (info.getAttachment() == null) {
+                    		sender.sendMessage(g + "Node " + w + info.getPermission() + g + "=" + w + info.getValue() + g + " (" + r + "default" + g + ")");
+                    	} else {
+                    		sender.sendMessage(g + "Node " + w + info.getPermission() + g + "=" + w + info.getValue() + g + " (" + w + info.getAttachment().getPlugin().getDescription().getName() + g + ")");
+                    	}
                     }
+                } else {
+                	for (int i = 0; i < dump.size(); ++i) {
+                		PermissionAttachmentInfo info = dump.get(i);
+                		sender.sendMessage(info.getPermission());
+                	}
                 }
             }
             return true;
