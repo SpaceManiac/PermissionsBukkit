@@ -12,7 +12,7 @@ import java.util.Set;
 /**
  * Handles statistic tracking for PermissionsBukkit
  */
-public class PermissionsMetrics {
+class PermissionsMetrics {
 
     private final PermissionsPlugin plugin;
 

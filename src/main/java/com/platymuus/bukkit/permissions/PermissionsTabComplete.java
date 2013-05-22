@@ -13,7 +13,7 @@ import java.util.*;
 /**
  * TabCompleter for /permissions
  */
-public class PermissionsTabComplete implements TabCompleter {
+class PermissionsTabComplete implements TabCompleter {
 
     private final List<String> BOOLEAN = ImmutableList.of("true", "false");
     private final List<String> ROOT_SUBS = ImmutableList.of("reload", "about", "check", "info", "dump", "rank", "setrank", "group", "player");

@@ -35,9 +35,8 @@ class PlayerListener implements Listener {
 
     // Unregister players when needed
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerKick(PlayerKickEvent event) {
-        if (event.isCancelled()) return;
         plugin.debug("Player " + event.getPlayer().getName() + " was kicked, unregistering...");
         plugin.unregisterPlayer(event.getPlayer());
     }
@@ -50,9 +49,8 @@ class PlayerListener implements Listener {
     
     // Prevent doing things in the event of permissions.build: false
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
-        if (event.isCancelled()) return;
         if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_AIR) {
             return;
         }
@@ -62,18 +60,16 @@ class PlayerListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBlockPlace(BlockPlaceEvent event) {
-        if (event.isCancelled()) return;
         if (!event.getPlayer().hasPermission("permissions.build")) {
             bother(event.getPlayer());
             event.setCancelled(true);
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
-        if (event.isCancelled()) return;
         if (!event.getPlayer().hasPermission("permissions.build")) {
             bother(event.getPlayer());
             event.setCancelled(true);
