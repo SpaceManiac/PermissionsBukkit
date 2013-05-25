@@ -115,6 +115,7 @@ public class PermissionsPlugin extends JavaPlugin {
      * @return A Group if it exists or null otherwise.
      */
     public Group getGroup(String groupName) {
+        metrics.apiUsed();
         if (getNode("groups") != null) {
             for (String key : getNode("groups").getKeys(false)) {
                 if (key.equalsIgnoreCase(groupName)) {
@@ -131,6 +132,7 @@ public class PermissionsPlugin extends JavaPlugin {
      * @return The groups this player is in. May be empty.
      */
     public List<Group> getGroups(String playerName) {
+        metrics.apiUsed();
         ArrayList<Group> result = new ArrayList<Group>();
         if (getNode("users/" + playerName) != null) {
             for (String key : getNode("users/" + playerName).getStringList("groups")) {
@@ -148,6 +150,7 @@ public class PermissionsPlugin extends JavaPlugin {
      * @return A PermissionsInfo about this player.
      */
     public PermissionInfo getPlayerInfo(String playerName) {
+        metrics.apiUsed();
         if (getNode("users/" + playerName) == null) {
             return null;
         } else {
@@ -160,6 +163,7 @@ public class PermissionsPlugin extends JavaPlugin {
      * @return The list of groups.
      */
     public List<Group> getAllGroups() {
+        metrics.apiUsed();
         ArrayList<Group> result = new ArrayList<Group>();
         if (getNode("groups") != null) {
             for (String key : getNode("groups").getKeys(false)) {

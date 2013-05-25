@@ -20,6 +20,8 @@ class PermissionsMetrics {
     private Metrics.Graph featuresUsed;
     private Metrics.Graph usage;
 
+    private boolean apiUsed = false;
+
     public PermissionsMetrics(PermissionsPlugin plugin) {
         this.plugin = plugin;
     }
@@ -41,7 +43,7 @@ class PermissionsMetrics {
 
         HashMap<String, String> result = new HashMap<String, String>();
         for (Metrics.Plotter plotter : graph.getPlotters()) {
-            String value = "";
+            String value;
             if (plotter instanceof BooleanPlotter) {
                 value = "" + ((BooleanPlotter) plotter).value();
             } else {
@@ -54,6 +56,10 @@ class PermissionsMetrics {
 
     private ConfigurationSection getSection(String name) {
         return plugin.getConfig().getConfigurationSection(name);
+    }
+
+    public void apiUsed() {
+        apiUsed = true;
     }
 
     private void setupFeaturesUsed() {
@@ -166,6 +172,14 @@ class PermissionsMetrics {
             @Override
             protected boolean value() {
                 return plugin.getConfig().getBoolean("debug", false);
+            }
+        });
+
+        // Whether the public-facing API has seen recent usage
+        graph.addPlotter(new BooleanPlotter("API Used") {
+            @Override
+            protected boolean value() {
+                return apiUsed;
             }
         });
     }
@@ -328,7 +342,7 @@ class PermissionsMetrics {
         }
 
         @Override
-        public int getValue() {
+        public final int getValue() {
             try {
                 return value() ? 1 : 0;
             }
