@@ -40,8 +40,10 @@ class PermissionsMetrics {
 
     public HashMap<String, String> summarize(int type) {
         Metrics.Graph graph = type == 0 ? featuresUsed : usage;
-
         HashMap<String, String> result = new HashMap<String, String>();
+
+        if (graph == null) return result;
+
         for (Metrics.Plotter plotter : graph.getPlotters()) {
             String value;
             if (plotter instanceof BooleanPlotter) {
