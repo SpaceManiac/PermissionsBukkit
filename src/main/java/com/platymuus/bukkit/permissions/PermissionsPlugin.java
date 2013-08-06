@@ -9,6 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -299,18 +300,33 @@ public class PermissionsPlugin extends JavaPlugin {
             return;
         }
 
-        for (String key : attachment.getPermissions().keySet()) {
-            attachment.unsetPermission(key);
-        }
+        Map<String, Boolean> values = calculatePlayerPermissions(player.getName().toLowerCase(), player.getWorld().getName());
 
-        for (Map.Entry<String, Boolean> entry : calculatePlayerPermissions(player.getName().toLowerCase(), player.getWorld().getName()).entrySet()) {
-            attachment.setPermission(entry.getKey(), entry.getValue());
-        }
+        // Fill the attachment reflectively so we don't recalculate for each permission
+        // it turns out there's a lot of permissions!
+        Map<String, Boolean> dest = reflectMap(attachment);
+        dest.clear();
+        dest.putAll(values);
 
         player.recalculatePermissions();
     }
 
     // -- Private stuff
+
+    private Field pField;
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Boolean> reflectMap(PermissionAttachment attachment) {
+        try {
+            if (pField == null) {
+                pField = PermissionAttachment.class.getDeclaredField("permissions");
+                pField.setAccessible(true);
+            }
+            return (Map<String, Boolean>) pField.get(attachment);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private Map<String, Boolean> calculatePlayerPermissions(String player, String world) {
         if (getNode("users/" + player) == null) {
