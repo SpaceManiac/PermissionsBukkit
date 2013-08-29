@@ -21,6 +21,7 @@ class PermissionsMetrics {
     private Metrics.Graph usage;
 
     private boolean apiUsed = false;
+    public boolean enabled = false;
 
     public PermissionsMetrics(PermissionsPlugin plugin) {
         this.plugin = plugin;
@@ -35,6 +36,7 @@ class PermissionsMetrics {
         setupFeaturesUsed();
         setupUsage();
 
+        enabled = true;
         metrics.start();
     }
 
