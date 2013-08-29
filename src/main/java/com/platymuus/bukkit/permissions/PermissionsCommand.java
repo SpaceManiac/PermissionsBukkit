@@ -12,6 +12,10 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.PluginDescriptionFile;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.*;
 
 /**
@@ -129,13 +133,17 @@ class PermissionsCommand implements CommandExecutor {
                 permissible = sender;
                 page = 1;
             } else if (split.length == 2) {
+                permissible = sender;
                 try {
-                    permissible = sender;
                     page = Integer.parseInt(split[1]);
                 }
                 catch (NumberFormatException ex) {
-                    permissible = plugin.getServer().getPlayer(split[1]);
-                    page = 1;
+                    if (split[1].equalsIgnoreCase("-file")) {
+                        page = -1;
+                    } else {
+                        permissible = plugin.getServer().getPlayer(split[1]);
+                        page = 1;
+                    }
                 }
             } else {
                 permissible = plugin.getServer().getPlayer(split[1]);
@@ -143,39 +151,74 @@ class PermissionsCommand implements CommandExecutor {
                     page = Integer.parseInt(split[2]);
                 }
                 catch (NumberFormatException ex) {
-                    page = 1;
+                    if (split[2].equalsIgnoreCase("-file")) {
+                        page = -1;
+                    } else {
+                        page = 1;
+                    }
                 }
             }
             
             if (permissible == null) {
                 sender.sendMessage(ChatColor.RED + "Player " + ChatColor.WHITE + split[1] + ChatColor.RED + " not found.");
-            } else {
-                ArrayList<PermissionAttachmentInfo> dump = new ArrayList<PermissionAttachmentInfo>(permissible.getEffectivePermissions());
-                Collections.sort(dump, new Comparator<PermissionAttachmentInfo>() {
-                    public int compare(PermissionAttachmentInfo a, PermissionAttachmentInfo b) {
-                        return a.getPermission().compareTo(b.getPermission());
-                    }
-                });
-                
-                int numpages = 1 + (dump.size() - 1) / 8;
-                if (page > numpages) {
-                    page = numpages;
-                } else if (page < 1) {
-                    page = 1;
+                return true;
+            }
+
+            ArrayList<PermissionAttachmentInfo> dump = new ArrayList<PermissionAttachmentInfo>(permissible.getEffectivePermissions());
+            Collections.sort(dump, new Comparator<PermissionAttachmentInfo>() {
+                public int compare(PermissionAttachmentInfo a, PermissionAttachmentInfo b) {
+                    return a.getPermission().compareTo(b.getPermission());
                 }
-                
-                ChatColor g = ChatColor.GREEN, w = ChatColor.WHITE, r = ChatColor.RED;
-                
-                int start = 8 * (page - 1);
-                sender.sendMessage(ChatColor.RED + "[==== " + ChatColor.GREEN + "Page " + page + " of " + numpages + ChatColor.RED + " ====]");
-                for (int i = start; i < start + 8 && i < dump.size(); ++i) {
-                    PermissionAttachmentInfo info = dump.get(i);
-                    
-                    if (info.getAttachment() == null) {
-                        sender.sendMessage(g + "Node " + w + info.getPermission() + g + "=" + w + info.getValue() + g + " (" + r + "default" + g + ")");
-                    } else {
-                        sender.sendMessage(g + "Node " + w + info.getPermission() + g + "=" + w + info.getValue() + g + " (" + w + info.getAttachment().getPlugin().getDescription().getName() + g + ")");
+            });
+
+            if (page == -1) {
+                // Dump to file
+                File file = new File(plugin.getDataFolder(), "dump.txt");
+                try {
+                    FileOutputStream fos = new FileOutputStream(file);
+                    PrintStream out = new PrintStream(fos);
+                    // right now permissible is always a CommandSender
+                    out.println("PermissionsBukkit dump for: " + ((CommandSender) permissible).getName());
+                    out.println(new Date().toString());
+
+                    for (PermissionAttachmentInfo info : dump) {
+                        if (info.getAttachment() == null) {
+                            out.println(info.getPermission() + "=" + info.getValue() + " (default)");
+                        } else {
+                            out.println(info.getPermission() + "=" + info.getValue() + " (" + info.getAttachment().getPlugin().getDescription().getName() + ")");
+                        }
                     }
+
+                    out.close();
+                    fos.close();
+
+                    sender.sendMessage(ChatColor.GREEN + "Permissions dump written to " + ChatColor.WHITE + file);
+                } catch (IOException e) {
+                    sender.sendMessage(ChatColor.RED + "Failed to write to dump.txt, see the console for more details");
+                    sender.sendMessage(ChatColor.RED + e.toString());
+                    e.printStackTrace();
+                }
+                return true;
+            }
+
+            int numpages = 1 + (dump.size() - 1) / 8;
+            if (page > numpages) {
+                page = numpages;
+            } else if (page < 1) {
+                page = 1;
+            }
+
+            ChatColor g = ChatColor.GREEN, w = ChatColor.WHITE, r = ChatColor.RED;
+
+            int start = 8 * (page - 1);
+            sender.sendMessage(ChatColor.RED + "[==== " + ChatColor.GREEN + "Page " + page + " of " + numpages + ChatColor.RED + " ====]");
+            for (int i = start; i < start + 8 && i < dump.size(); ++i) {
+                PermissionAttachmentInfo info = dump.get(i);
+
+                if (info.getAttachment() == null) {
+                    sender.sendMessage(g + "Node " + w + info.getPermission() + g + "=" + w + info.getValue() + g + " (" + r + "default" + g + ")");
+                } else {
+                    sender.sendMessage(g + "Node " + w + info.getPermission() + g + "=" + w + info.getValue() + g + " (" + w + info.getAttachment().getPlugin().getDescription().getName() + g + ")");
                 }
             }
             return true;
