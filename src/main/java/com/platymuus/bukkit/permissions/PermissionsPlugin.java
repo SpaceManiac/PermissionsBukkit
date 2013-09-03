@@ -237,7 +237,6 @@ public class PermissionsPlugin extends JavaPlugin {
     }
 
     protected HashMap<String, Boolean> getAllPerms(String desc, String path) {
-        HashMap<String, Boolean> result = new HashMap<String, Boolean>();
         ConfigurationSection node = getNode(path);
         
         int failures = 0;
@@ -263,6 +262,7 @@ public class PermissionsPlugin extends JavaPlugin {
             saveConfig();
         }
 
+        LinkedHashMap<String, Boolean> result = new LinkedHashMap<String, Boolean>();
         // Do the actual getting of permissions
         for (String key : node.getKeys(false)) {
             if (node.isBoolean(key)) {
@@ -328,28 +328,44 @@ public class PermissionsPlugin extends JavaPlugin {
         }
     }
 
+    // normally, LinkedHashMap.put (and thus putAll) will not reorder the list
+    // if that key is already in the map, which we don't want - later puts should
+    // always be bumped to the end of the list
+    private <K, V> void put(Map<K, V> dest, K key, V value) {
+        dest.remove(key);
+        dest.put(key, value);
+    }
+
+    private <K, V> void putAll(Map<K, V> dest, Map<K, V> src) {
+        for (Map.Entry<K, V> entry : src.entrySet()) {
+            put(dest, entry.getKey(), entry.getValue());
+        }
+    }
+
     private Map<String, Boolean> calculatePlayerPermissions(String player, String world) {
-        if (getNode("users/" + player) == null) {
+        String playerNode = "users/" + player;
+
+        // if the player isn't in the config, act like they're in default
+        if (getNode(playerNode) == null) {
             return calculateGroupPermissions("default", world);
         }
 
-        Map<String, Boolean> perms = getNode("users/" + player + "/permissions") == null ?
-                new HashMap<String, Boolean>() :
-                getAllPerms("user " + player, "users/" + player + "/permissions");
+        Map<String, Boolean> perms = new LinkedHashMap<String, Boolean>();
 
-        if (getNode("users/" + player + "/worlds/" + world) != null) {
-            for (Map.Entry<String, Boolean> entry : getAllPerms("user " + player + " world " + world, "users/" + player + "/worlds/" + world).entrySet()) {
-                // No containskey; world overrides non-world
-                perms.put(entry.getKey(), entry.getValue());
-            }
+        // first, apply the player's groups (getStringList returns an empty list if not found)
+        // later groups override earlier groups
+        for (String group : getNode(playerNode).getStringList("groups")) {
+            putAll(perms, calculateGroupPermissions(group, world));
         }
 
-        for (String group : getNode("users/" + player).getStringList("groups")) {
-            for (Map.Entry<String, Boolean> entry : calculateGroupPermissions(group, world).entrySet()) {
-                if (!perms.containsKey(entry.getKey())) { // User overrides group
-                    perms.put(entry.getKey(), entry.getValue());
-                }
-            }
+        // now apply user-specific permissions
+        if (getNode(playerNode + "/permissions") != null) {
+            putAll(perms, getAllPerms("user " + player, playerNode + "/permissions"));
+        }
+
+        // now apply world- and user-specific permissions
+        if (getNode(playerNode + "/worlds/" + world) != null) {
+            putAll(perms, getAllPerms("user " + player + " world " + world, playerNode + "/worlds/" + world));
         }
 
         return perms;
@@ -361,34 +377,34 @@ public class PermissionsPlugin extends JavaPlugin {
     }
 
     private Map<String, Boolean> calculateGroupPermissions0(String group, String world) {
-        if (getNode("groups/" + group) == null) {
-            return new HashMap<String, Boolean>();
+        String groupNode = "groups/" + group;
+
+        // if the group's not in the config, nothing
+        if (getNode(groupNode) == null) {
+            return new LinkedHashMap<String, Boolean>();
         }
 
         recursionBuffer.add(group);
+        Map<String, Boolean> perms = new LinkedHashMap<String, Boolean>();
 
-        Map<String, Boolean> perms = getNode("groups/" + group + "/permissions") == null ?
-                new HashMap<String, Boolean>() :
-                getAllPerms("group " + group, "groups/" + group + "/permissions");
-        
-
-        if (getNode("groups/" + group + "/worlds/" + world) != null) {
-            for (Map.Entry<String, Boolean> entry : getAllPerms("group " + group + " world " + world, "groups/" + group + "/worlds/" + world).entrySet()) {
-                // No containskey; world overrides non-world
-                perms.put(entry.getKey(), entry.getValue());
-            }
-        }
-
-        for (String parent : getNode("groups/" + group).getStringList("inheritance")) {
+        // first apply any parent groups (see calculatePlayerPermissions for more)
+        for (String parent : getNode(groupNode).getStringList("inheritance")) {
             if (recursionBuffer.contains(parent)) {
                 getLogger().warning("In group " + group + ": recursive inheritance from " + parent);
                 continue;
             }
-            for (Map.Entry<String, Boolean> entry : calculateGroupPermissions0(parent, world).entrySet()) {
-                if (!perms.containsKey(entry.getKey())) { // Children override permissions
-                    perms.put(entry.getKey(), entry.getValue());
-                }
-            }
+
+            putAll(perms, calculateGroupPermissions0(parent, world));
+        }
+
+        // now apply the group's permissions
+        if (getNode(groupNode + "/permissions") != null) {
+            putAll(perms, getAllPerms("group " + group, groupNode + "/permissions"));
+        }
+
+        // now apply world-specific permissions
+        if (getNode(groupNode + "/worlds/" + world) != null) {
+            putAll(perms, getAllPerms("group " + group + " world " + world, groupNode + "/worlds/" + world));
         }
 
         return perms;
