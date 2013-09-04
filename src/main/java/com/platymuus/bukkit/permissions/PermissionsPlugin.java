@@ -24,7 +24,6 @@ public class PermissionsPlugin extends JavaPlugin {
     private PermissionsMetrics metrics = new PermissionsMetrics(this);
 
     private HashMap<String, PermissionAttachment> permissions = new HashMap<String, PermissionAttachment>();
-    private HashSet<String> recursionBuffer = new HashSet<String>();
     
     private File configFile;
     private YamlConfiguration config;
@@ -206,6 +205,7 @@ public class PermissionsPlugin extends JavaPlugin {
 
     protected void refreshForPlayer(String player) {
         saveConfig();
+        debug("Refreshing for player " + player);
 
         Player onlinePlayer = getServer().getPlayerExact(player);
         if (onlinePlayer != null) {
@@ -213,18 +213,45 @@ public class PermissionsPlugin extends JavaPlugin {
         }
     }
 
+    private void fillChildGroups(HashSet<String> childGroups, String group) {
+        if (childGroups.contains(group)) return;
+        childGroups.add(group);
+
+        for (String key : getNode("groups").getKeys(false)) {
+            for (String parent : getNode("groups/" + key).getStringList("inheritance")) {
+                if (parent.equalsIgnoreCase(group)) {
+                    fillChildGroups(childGroups, key);
+                }
+            }
+        }
+    }
+
     protected void refreshForGroup(String group) {
         saveConfig();
 
+        // build the set of groups which are children of "group"
+        // e.g. if Bob is only a member of "expert" which inherits "user", he
+        // must be updated if the permissions of "user" change
+        HashSet<String> childGroups = new HashSet<String>();
+        fillChildGroups(childGroups, group);
+        debug("Refreshing for group " + group + " (total " + childGroups.size() + " subgroups)");
+
         for (String player : permissions.keySet()) {
             ConfigurationSection node = getNode("users/" + player);
-            if (node != null && node.getStringList("groups").contains(group)) {
-                calculateAttachment(getServer().getPlayerExact(player));
+
+            // if the player isn't in the config, act like they're in default
+            List<String> groupList = (node != null) ? node.getStringList("groups") : Arrays.asList("default");
+            for (String userGroup : groupList) {
+                if (childGroups.contains(userGroup)) {
+                    calculateAttachment(getServer().getPlayerExact(player));
+                    break;
+                }
             }
         }
     }
 
     protected void refreshPermissions() {
+        debug("Refreshing all permissions (for " + permissions.size() + " players)");
         for (String player : permissions.keySet()) {
             calculateAttachment(getServer().getPlayerExact(player));
         }
@@ -321,6 +348,7 @@ public class PermissionsPlugin extends JavaPlugin {
         Map<String, Boolean> dest = reflectMap(attachment);
         dest.clear();
         dest.putAll(values);
+        debug("Calculated permissions on " + player.getName() + ": " + dest.size() + " values");
 
         player.recalculatePermissions();
     }
@@ -386,11 +414,10 @@ public class PermissionsPlugin extends JavaPlugin {
     }
 
     private Map<String, Boolean> calculateGroupPermissions(String group, String world) {
-        recursionBuffer.clear();
-        return calculateGroupPermissions0(group, world);
+        return calculateGroupPermissions0(new HashSet<String>(), group, world);
     }
 
-    private Map<String, Boolean> calculateGroupPermissions0(String group, String world) {
+    private Map<String, Boolean> calculateGroupPermissions0(Set<String> recursionBuffer, String group, String world) {
         String groupNode = "groups/" + group;
 
         // if the group's not in the config, nothing
@@ -408,7 +435,7 @@ public class PermissionsPlugin extends JavaPlugin {
                 continue;
             }
 
-            putAll(perms, calculateGroupPermissions0(parent, world));
+            putAll(perms, calculateGroupPermissions0(recursionBuffer, parent, world));
         }
 
         // now apply the group's permissions
