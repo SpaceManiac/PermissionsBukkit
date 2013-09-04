@@ -204,14 +204,28 @@ public class PermissionsPlugin extends JavaPlugin {
         }
     }
 
-    protected void refreshPermissions() {
+    protected void refreshForPlayer(String player) {
         saveConfig();
-        for (String player : permissions.keySet()) {
-            PermissionAttachment attachment = permissions.get(player);
-            for (String key : attachment.getPermissions().keySet()) {
-                attachment.unsetPermission(key);
-            }
 
+        Player onlinePlayer = getServer().getPlayer(player);
+        if (onlinePlayer != null) {
+            calculateAttachment(onlinePlayer);
+        }
+    }
+
+    protected void refreshForGroup(String group) {
+        saveConfig();
+
+        for (String player : permissions.keySet()) {
+            ConfigurationSection node = getNode("users/" + player);
+            if (node != null && node.getStringList("groups").contains(group)) {
+                calculateAttachment(getServer().getPlayer(player));
+            }
+        }
+    }
+
+    protected void refreshPermissions() {
+        for (String player : permissions.keySet()) {
             calculateAttachment(getServer().getPlayer(player));
         }
     }

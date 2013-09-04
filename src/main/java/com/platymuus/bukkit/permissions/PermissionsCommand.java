@@ -240,7 +240,7 @@ class PermissionsCommand implements CommandExecutor {
             }
 
             plugin.getNode("users/" + player).set("groups", Arrays.asList(group));
-            plugin.refreshPermissions();
+            plugin.refreshForPlayer(player);
 
             sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + player + ChatColor.GREEN + " is now in " + ChatColor.WHITE + group + ChatColor.GREEN + ".");
             return true;
@@ -319,7 +319,7 @@ class PermissionsCommand implements CommandExecutor {
             }
 
             plugin.getNode("groups/" + group + "/" + node).set(perm, value);
-            plugin.refreshPermissions();
+            plugin.refreshForGroup(group);
             
             sender.sendMessage(ChatColor.GREEN + "Group " + ChatColor.WHITE + group + ChatColor.GREEN + " now has " + ChatColor.WHITE + perm + ChatColor.GREEN + " = " + ChatColor.WHITE + value + ChatColor.GREEN + ".");
             return true;
@@ -350,7 +350,7 @@ class PermissionsCommand implements CommandExecutor {
                 return true;
             }
             sec.set(perm, null);
-            plugin.refreshPermissions();
+            plugin.refreshForGroup(group);
             
             sender.sendMessage(ChatColor.GREEN + "Group " + ChatColor.WHITE + group + ChatColor.GREEN + " no longer has " + ChatColor.WHITE + perm + ChatColor.GREEN + " set.");
             return true;
@@ -392,7 +392,7 @@ class PermissionsCommand implements CommandExecutor {
             }
             
             plugin.getNode("users/" + player).set("groups", Arrays.asList(groups));
-            plugin.refreshPermissions();
+            plugin.refreshForPlayer(player);
             
             sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + player + ChatColor.GREEN + " is now in " + ChatColor.WHITE + split[3] + ChatColor.GREEN + ".");
             return true;
@@ -413,8 +413,8 @@ class PermissionsCommand implements CommandExecutor {
             }
             list.add(group);
             plugin.getNode("users/" + player).set("groups", list);
-            
-            plugin.refreshPermissions();
+
+            plugin.refreshForPlayer(player);
             
             sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + player + ChatColor.GREEN + " is now in " + ChatColor.WHITE + group + ChatColor.GREEN + ".");
             return true;
@@ -435,8 +435,8 @@ class PermissionsCommand implements CommandExecutor {
             }
             list.remove(group);
             plugin.getNode("users/" + player).set("groups", list);
-            
-            plugin.refreshPermissions();
+
+            plugin.refreshForPlayer(player);
             
             sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + player + ChatColor.GREEN + " is no longer in " + ChatColor.WHITE + group + ChatColor.GREEN + ".");
             return true;
@@ -462,7 +462,7 @@ class PermissionsCommand implements CommandExecutor {
             }
 
             plugin.getNode("users/" + player + "/" + node).set(perm, value);
-            plugin.refreshPermissions();
+            plugin.refreshForPlayer(player);
             
             sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + player + ChatColor.GREEN + " now has " + ChatColor.WHITE + perm + ChatColor.GREEN + " = " + ChatColor.WHITE + value + ChatColor.GREEN + ".");
             return true;
@@ -492,7 +492,7 @@ class PermissionsCommand implements CommandExecutor {
                 return true;
             }
             sec.set(perm, null);
-            plugin.refreshPermissions();
+            plugin.refreshForPlayer(player);
             
             sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + player + ChatColor.GREEN + " no longer has " + ChatColor.WHITE + perm + ChatColor.GREEN + " set.");
             return true;
