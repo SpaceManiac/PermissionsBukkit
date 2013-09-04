@@ -207,7 +207,7 @@ public class PermissionsPlugin extends JavaPlugin {
     protected void refreshForPlayer(String player) {
         saveConfig();
 
-        Player onlinePlayer = getServer().getPlayer(player);
+        Player onlinePlayer = getServer().getPlayerExact(player);
         if (onlinePlayer != null) {
             calculateAttachment(onlinePlayer);
         }
@@ -219,14 +219,14 @@ public class PermissionsPlugin extends JavaPlugin {
         for (String player : permissions.keySet()) {
             ConfigurationSection node = getNode("users/" + player);
             if (node != null && node.getStringList("groups").contains(group)) {
-                calculateAttachment(getServer().getPlayer(player));
+                calculateAttachment(getServer().getPlayerExact(player));
             }
         }
     }
 
     protected void refreshPermissions() {
         for (String player : permissions.keySet()) {
-            calculateAttachment(getServer().getPlayer(player));
+            calculateAttachment(getServer().getPlayerExact(player));
         }
     }
     

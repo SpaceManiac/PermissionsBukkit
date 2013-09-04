@@ -41,7 +41,7 @@ public class Group {
     public List<Player> getOnlinePlayers() {
         ArrayList<Player> result = new ArrayList<Player>();
         for (String user : getPlayers()) {
-            Player player = Bukkit.getServer().getPlayer(user);
+            Player player = Bukkit.getServer().getPlayerExact(user);
             if (player != null && player.isOnline()) {
                 result.add(player);
             }
