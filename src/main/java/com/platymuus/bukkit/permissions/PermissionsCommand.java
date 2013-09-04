@@ -38,8 +38,13 @@ class PermissionsCommand implements CommandExecutor {
         if (subcommand.equals("reload")) {
             if (!checkPerm(sender, "reload")) return true;
             plugin.reloadConfig();
-            plugin.refreshPermissions();
-            sender.sendMessage(ChatColor.GREEN + "Configuration reloaded.");
+            if (plugin.configLoadError) {
+                plugin.configLoadError = false;
+                sender.sendMessage(ChatColor.RED + "Your configuration is invalid, see the console for details.");
+            } else {
+                plugin.refreshPermissions();
+                sender.sendMessage(ChatColor.GREEN + "Configuration reloaded.");
+            }
             return true;
         } else if (subcommand.equals("about")) {
             if (!checkPerm(sender, "about")) return true;

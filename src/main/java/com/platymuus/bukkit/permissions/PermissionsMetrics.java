@@ -1,6 +1,7 @@
 package com.platymuus.bukkit.permissions;
 
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.MemoryConfiguration;
 import org.mcstats.Metrics;
 
 import java.io.File;
@@ -57,7 +58,12 @@ class PermissionsMetrics {
     }
 
     private ConfigurationSection getSection(String name) {
-        return plugin.getConfig().getConfigurationSection(name);
+        // make sure we don't NPE if users or groups is missing
+        ConfigurationSection result = plugin.getNode(name);
+        if (result == null) {
+            result = new MemoryConfiguration();
+        }
+        return result;
     }
 
     public void apiUsed() {

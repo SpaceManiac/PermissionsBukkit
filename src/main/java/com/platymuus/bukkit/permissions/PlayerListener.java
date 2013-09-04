@@ -1,10 +1,13 @@
 package com.platymuus.bukkit.permissions;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.*;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.*;
 
 /**
@@ -31,6 +34,11 @@ class PlayerListener implements Listener {
     public void onPlayerLogin(PlayerJoinEvent event) {
         plugin.debug("Player " + event.getPlayer().getName() + " joined, registering...");
         plugin.registerPlayer(event.getPlayer());
+
+        if (plugin.configLoadError && event.getPlayer().hasPermission("permissions.reload")) {
+            plugin.configLoadError = false;
+            event.getPlayer().sendMessage(ChatColor.RED + "[" + ChatColor.GREEN + "PermissionsBukkit" + ChatColor.RED + "] Your configuration is invalid, see the console for details.");
+        }
     }
 
     // Unregister players when needed
