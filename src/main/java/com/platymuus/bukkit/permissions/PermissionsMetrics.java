@@ -331,6 +331,8 @@ class PermissionsMetrics {
             }
 
             private void fill(Set<String> results, ConfigurationSection section) {
+                if (section == null) return;
+
                 for (String key : section.getKeys(false)) {
                     if (section.isConfigurationSection(key)) {
                         ConfigurationSection individual = section.getConfigurationSection(key);
