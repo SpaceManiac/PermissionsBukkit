@@ -48,6 +48,9 @@ permissions:
   permissions.build:
     description: Allows player to build.
     default: true
+  permissions.interact:
+    description: Allows player to interact when build is false.
+    default: false
   permissions.help:
     description: Allows viewing of usage for /permissions.
   permissions.reload:
