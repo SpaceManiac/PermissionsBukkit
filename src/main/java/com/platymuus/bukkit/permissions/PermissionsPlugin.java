@@ -29,7 +29,7 @@ public class PermissionsPlugin extends JavaPlugin {
     private PermissionsTabComplete tabCompleter = new PermissionsTabComplete(this);
     private PermissionsMetrics metrics = new PermissionsMetrics(this);
 
-    private HashMap<String, PermissionAttachment> permissions = new HashMap<String, PermissionAttachment>();
+    private HashMap<UUID, PermissionAttachment> permissions = new HashMap<UUID, PermissionAttachment>();
     
     private File configFile;
     private YamlConfiguration config;
@@ -234,24 +234,24 @@ public class PermissionsPlugin extends JavaPlugin {
     }
     
     protected void registerPlayer(Player player) {
-        if (permissions.containsKey(player.getName())) {
+        if (permissions.containsKey(player.getUniqueId())) {
             debug("Registering " + player.getName() + ": was already registered");
             unregisterPlayer(player);
         }
         PermissionAttachment attachment = player.addAttachment(this);
-        permissions.put(player.getName(), attachment);
+        permissions.put(player.getUniqueId(), attachment);
         calculateAttachment(player);
     }
 
     protected void unregisterPlayer(Player player) {
-        if (permissions.containsKey(player.getName())) {
+        if (permissions.containsKey(player.getUniqueId())) {
             try {
-                player.removeAttachment(permissions.get(player.getName()));
+                player.removeAttachment(permissions.get(player.getUniqueId()));
             }
             catch (IllegalArgumentException ex) {
                 debug("Unregistering " + player.getName() + ": player did not have attachment");
             }
-            permissions.remove(player.getName());
+            permissions.remove(player.getUniqueId());
         } else {
             debug("Unregistering " + player.getName() + ": was not registered");
         }
@@ -290,14 +290,15 @@ public class PermissionsPlugin extends JavaPlugin {
         fillChildGroups(childGroups, group);
         debug("Refreshing for group " + group + " (total " + childGroups.size() + " subgroups)");
 
-        for (String player : permissions.keySet()) {
-            ConfigurationSection node = getNode("users/" + player);
+        for (UUID uuid : permissions.keySet()) {
+            Player player = getServer().getPlayer(uuid);
+            ConfigurationSection node = getUserNode(player);
 
             // if the player isn't in the config, act like they're in default
             List<String> groupList = (node != null) ? node.getStringList("groups") : Arrays.asList("default");
             for (String userGroup : groupList) {
                 if (childGroups.contains(userGroup)) {
-                    calculateAttachment(getServer().getPlayerExact(player));
+                    calculateAttachment(player);
                     break;
                 }
             }
@@ -306,8 +307,8 @@ public class PermissionsPlugin extends JavaPlugin {
 
     protected void refreshPermissions() {
         debug("Refreshing all permissions (for " + permissions.size() + " players)");
-        for (String player : permissions.keySet()) {
-            calculateAttachment(getServer().getPlayerExact(player));
+        for (UUID player : permissions.keySet()) {
+            calculateAttachment(getServer().getPlayer(player));
         }
     }
     
@@ -318,6 +319,18 @@ public class PermissionsPlugin extends JavaPlugin {
             }
         }
         return null;
+    }
+
+    protected ConfigurationSection getUserNode(Player player) {
+        ConfigurationSection sec = getNode("users/" + player.getUniqueId());
+        if (sec == null) {
+            sec = getNode("users/" + player.getName());
+            getConfig().set(sec.getCurrentPath(), null);
+            getConfig().set("users/" + player.getUniqueId(), sec);
+            debug("Migrated " + player.getName() + " to their UUID, " + player.getUniqueId());
+            saveConfig();
+        }
+        return sec;
     }
 
     protected void createNode(String node) {
@@ -389,13 +402,13 @@ public class PermissionsPlugin extends JavaPlugin {
         if (player == null) {
             return;
         }
-        PermissionAttachment attachment = permissions.get(player.getName());
+        PermissionAttachment attachment = permissions.get(player.getUniqueId());
         if (attachment == null) {
             debug("Calculating permissions on " + player.getName() + ": attachment was null");
             return;
         }
 
-        Map<String, Boolean> values = calculatePlayerPermissions(player.getName().toLowerCase(), player.getWorld().getName());
+        Map<String, Boolean> values = calculatePlayerPermissions(player, player.getWorld().getName());
 
         // Fill the attachment reflectively so we don't recalculate for each permission
         // it turns out there's a lot of permissions!
@@ -438,11 +451,12 @@ public class PermissionsPlugin extends JavaPlugin {
         }
     }
 
-    private Map<String, Boolean> calculatePlayerPermissions(String player, String world) {
-        String playerNode = "users/" + player;
+    private Map<String, Boolean> calculatePlayerPermissions(Player player, String world) {
+        ConfigurationSection node = getUserNode(player);
+        String nodePath = node.getCurrentPath();
 
         // if the player isn't in the config, act like they're in default
-        if (getNode(playerNode) == null) {
+        if (node == null) {
             return calculateGroupPermissions("default", world);
         }
 
@@ -450,18 +464,18 @@ public class PermissionsPlugin extends JavaPlugin {
 
         // first, apply the player's groups (getStringList returns an empty list if not found)
         // later groups override earlier groups
-        for (String group : getNode(playerNode).getStringList("groups")) {
+        for (String group : node.getStringList("groups")) {
             putAll(perms, calculateGroupPermissions(group, world));
         }
 
         // now apply user-specific permissions
-        if (getNode(playerNode + "/permissions") != null) {
-            putAll(perms, getAllPerms("user " + player, playerNode + "/permissions"));
+        if (getNode(nodePath + "/permissions") != null) {
+            putAll(perms, getAllPerms("user " + player, nodePath + "/permissions"));
         }
 
         // now apply world- and user-specific permissions
-        if (getNode(playerNode + "/worlds/" + world) != null) {
-            putAll(perms, getAllPerms("user " + player + " world " + world, playerNode + "/worlds/" + world));
+        if (getNode(nodePath + "/worlds/" + world) != null) {
+            putAll(perms, getAllPerms("user " + player + " world " + world, nodePath + "/worlds/" + world));
         }
 
         return perms;
