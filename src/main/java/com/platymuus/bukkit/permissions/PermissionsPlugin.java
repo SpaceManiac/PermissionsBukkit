@@ -257,11 +257,11 @@ public class PermissionsPlugin extends JavaPlugin {
         }
     }
 
-    protected void refreshForPlayer(String player) {
+    protected void refreshForPlayer(UUID player) {
         saveConfig();
         debug("Refreshing for player " + player);
 
-        Player onlinePlayer = getServer().getPlayerExact(player);
+        Player onlinePlayer = getServer().getPlayer(player);
         if (onlinePlayer != null) {
             calculateAttachment(onlinePlayer);
         }
@@ -333,7 +333,7 @@ public class PermissionsPlugin extends JavaPlugin {
         return sec;
     }
 
-    protected void createNode(String node) {
+    protected ConfigurationSection createNode(String node) {
         ConfigurationSection sec = getConfig();
         for (String piece : node.split("/")) {
             ConfigurationSection sec2 = getNode(sec == getConfig() ? piece : sec.getCurrentPath() + "/" + piece);
@@ -342,6 +342,7 @@ public class PermissionsPlugin extends JavaPlugin {
             }
             sec = sec2;
         }
+        return sec;
     }
 
     protected HashMap<String, Boolean> getAllPerms(String desc, String path) {
