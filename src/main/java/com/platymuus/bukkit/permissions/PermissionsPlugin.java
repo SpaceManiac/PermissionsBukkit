@@ -325,10 +325,12 @@ public class PermissionsPlugin extends JavaPlugin {
         ConfigurationSection sec = getNode("users/" + player.getUniqueId());
         if (sec == null) {
             sec = getNode("users/" + player.getName());
-            getConfig().set(sec.getCurrentPath(), null);
-            getConfig().set("users/" + player.getUniqueId(), sec);
-            debug("Migrated " + player.getName() + " to their UUID, " + player.getUniqueId());
-            saveConfig();
+            if (sec != null) {
+                getConfig().set(sec.getCurrentPath(), null);
+                getConfig().set("users/" + player.getUniqueId(), sec);
+                debug("Migrated " + player.getName() + " to their UUID in config");
+                saveConfig();
+            }
         }
         return sec;
     }
@@ -454,13 +456,13 @@ public class PermissionsPlugin extends JavaPlugin {
 
     private Map<String, Boolean> calculatePlayerPermissions(Player player, String world) {
         ConfigurationSection node = getUserNode(player);
-        String nodePath = node.getCurrentPath();
 
         // if the player isn't in the config, act like they're in default
         if (node == null) {
             return calculateGroupPermissions("default", world);
         }
 
+        String nodePath = node.getCurrentPath();
         Map<String, Boolean> perms = new LinkedHashMap<String, Boolean>();
 
         // first, apply the player's groups (getStringList returns an empty list if not found)
