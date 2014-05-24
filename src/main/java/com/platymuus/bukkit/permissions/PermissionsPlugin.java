@@ -30,7 +30,7 @@ public class PermissionsPlugin extends JavaPlugin {
     private PermissionsMetrics metrics = new PermissionsMetrics(this);
 
     private HashMap<UUID, PermissionAttachment> permissions = new HashMap<UUID, PermissionAttachment>();
-    
+
     private File configFile;
     private YamlConfiguration config;
 
@@ -164,6 +164,25 @@ public class PermissionsPlugin extends JavaPlugin {
 
     // -- External API
     /**
+     * Add a player to a group by UUID.
+		 * @param uuid The UUID of the player.
+     * @param group The name of the group.
+     * @return False if the player was already in the group
+     */
+    public boolean addPlayerToGroup(UUID uuid, String group)
+	  {
+			  metrics.apiUsed();
+		    List<String> list = createNode("users/" + uuid).getStringList("groups");
+		    if (list.contains(group))	{
+			    return false;
+		    }
+		    list.add(group);
+		    getNode("users/" + uuid).set("groups", list);
+		    refreshForPlayer(uuid);
+		    return true;
+	  }
+
+    /**
      * Get the group with the given name.
      * @param groupName The name of the group.
      * @return A Group if it exists or null otherwise.
@@ -199,6 +218,24 @@ public class PermissionsPlugin extends JavaPlugin {
     }
 
     /**
+     * Returns a list of groups a player is in.
+     * @param uuid The uuid of the player.
+     * @return The groups this player is in. May be empty.
+     */
+    public List<Group> getGroups(UUID uuid) {
+        metrics.apiUsed();
+        ArrayList<Group> result = new ArrayList<Group>();
+        if (getNode("users/" + uuid) != null) {
+            for (String key : getNode("users/" + uuid).getStringList("groups")) {
+                result.add(new Group(this, key));
+            }
+        } else {
+            result.add(new Group(this, "default"));
+        }
+        return result;
+    }
+
+		/**
      * Returns permission info on the given player.
      * @param playerName The name of the player.
      * @return A PermissionsInfo about this player.
@@ -227,12 +264,30 @@ public class PermissionsPlugin extends JavaPlugin {
         return result;
     }
 
+    /**
+     * Remove a player to a group by UUID.
+		 * @param uuid The UUID of the player.
+     * @param group The name of the group.
+     * @return false if the player was not in the group.
+     */
+		public boolean removePlayerFromGroup(UUID uuid, String group)
+		{
+				List<String> list = createNode("users/" + uuid).getStringList("groups");
+				if (!list.contains(group)) {
+					return false;
+				}
+				list.remove(group);
+				getNode("users/" + uuid).set("groups", list);
+				refreshForPlayer(uuid);
+				return true;
+		}
+
     // -- Plugin stuff
 
     protected PermissionsMetrics getMetrics() {
         return metrics;
     }
-    
+
     protected void registerPlayer(Player player) {
         if (permissions.containsKey(player.getUniqueId())) {
             debug("Registering " + player.getName() + ": was already registered");
@@ -311,7 +366,7 @@ public class PermissionsPlugin extends JavaPlugin {
             calculateAttachment(getServer().getPlayer(player));
         }
     }
-    
+
     protected ConfigurationSection getNode(String node) {
         for (String entry : getConfig().getKeys(true)) {
             if (node.equalsIgnoreCase(entry) && getConfig().isConfigurationSection(entry)) {
@@ -349,7 +404,7 @@ public class PermissionsPlugin extends JavaPlugin {
 
     protected HashMap<String, Boolean> getAllPerms(String desc, String path) {
         ConfigurationSection node = getNode(path);
-        
+
         int failures = 0;
         String firstFailure = "";
 
@@ -385,16 +440,16 @@ public class PermissionsPlugin extends JavaPlugin {
                 }
             }
         }
-        
+
         if (failures == 1) {
             getLogger().warning("In " + desc + ": " + firstFailure + " is non-boolean.");
         } else if (failures > 1) {
             getLogger().warning("In " + desc + ": " + firstFailure + " is non-boolean (+" + (failures-1) + " more).");
         }
-        
+
         return result;
     }
-    
+
     protected void debug(String message) {
         if (getConfig().getBoolean("debug", false)) {
             getLogger().info("Debug: " + message);
@@ -521,5 +576,4 @@ public class PermissionsPlugin extends JavaPlugin {
 
         return perms;
     }
-
 }
