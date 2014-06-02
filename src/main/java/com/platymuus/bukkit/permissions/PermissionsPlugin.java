@@ -184,7 +184,9 @@ public class PermissionsPlugin extends JavaPlugin {
      * Returns a list of groups a player is in.
      * @param playerName The name of the player.
      * @return The groups this player is in. May be empty.
+     * @deprecated Use UUIDs instead.
      */
+    @Deprecated
     public List<Group> getGroups(String playerName) {
         metrics.apiUsed();
         ArrayList<Group> result = new ArrayList<Group>();
@@ -199,16 +201,50 @@ public class PermissionsPlugin extends JavaPlugin {
     }
 
     /**
+     * Returns a list of groups a player is in.
+     * @param player The uuid of the player.
+     * @return The groups this player is in. May be empty.
+     */
+    public List<Group> getGroups(UUID player) {
+        metrics.apiUsed();
+        ArrayList<Group> result = new ArrayList<Group>();
+        if (getNode("users/" + player) != null) {
+            for (String key : getNode("users/" + player).getStringList("groups")) {
+                result.add(new Group(this, key));
+            }
+        } else {
+            result.add(new Group(this, "default"));
+        }
+        return result;
+    }
+
+    /**
      * Returns permission info on the given player.
      * @param playerName The name of the player.
      * @return A PermissionsInfo about this player.
+     * @deprecated Use UUIDs instead.
      */
+    @Deprecated
     public PermissionInfo getPlayerInfo(String playerName) {
         metrics.apiUsed();
         if (getNode("users/" + playerName) == null) {
             return null;
         } else {
             return new PermissionInfo(this, getNode("users/" + playerName), "groups");
+        }
+    }
+
+    /**
+     * Returns permission info on the given player.
+     * @param player The uuid of the player.
+     * @return A PermissionsInfo about this player.
+     */
+    public PermissionInfo getPlayerInfo(UUID player) {
+        metrics.apiUsed();
+        if (getNode("users/" + player) == null) {
+            return null;
+        } else {
+            return new PermissionInfo(this, getNode("users/" + player), "groups");
         }
     }
 

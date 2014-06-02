@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * A class representing a permissions group.
@@ -24,6 +25,10 @@ public class Group {
         return name;
     }
 
+    /**
+     * @deprecated Use UUIDs instead.
+     */
+    @Deprecated
     public List<String> getPlayers() {
         ArrayList<String> result = new ArrayList<String>();
         if (plugin.getNode("users") != null) {
@@ -38,10 +43,30 @@ public class Group {
         return result;
     }
 
+    public List<UUID> getPlayerUUIDs() {
+        ArrayList<UUID> result = new ArrayList<UUID>();
+        if (plugin.getNode("users") != null) {
+            for (String user : plugin.getNode("users").getKeys(false)) {
+                UUID uuid;
+                try {
+                    uuid = UUID.fromString(user);
+                } catch (IllegalArgumentException ex) {
+                    continue;
+                }
+                for (String group : plugin.getNode("users/" + user).getStringList("groups")) {
+                    if (name.equalsIgnoreCase(group) && !result.contains(uuid)) {
+                        result.add(uuid);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
     public List<Player> getOnlinePlayers() {
         ArrayList<Player> result = new ArrayList<Player>();
-        for (String user : getPlayers()) {
-            Player player = Bukkit.getServer().getPlayerExact(user);
+        for (UUID uuid : getPlayerUUIDs()) {
+            Player player = Bukkit.getServer().getPlayer(uuid);
             if (player != null && player.isOnline()) {
                 result.add(player);
             }
