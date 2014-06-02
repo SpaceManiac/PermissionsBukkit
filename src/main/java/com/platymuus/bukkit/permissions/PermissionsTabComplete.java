@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.permissions.Permission;
 import org.bukkit.util.StringUtil;
 
@@ -13,7 +12,7 @@ import java.util.*;
 /**
  * TabCompleter for /permissions
  */
-class PermissionsTabComplete implements TabCompleter {
+final class PermissionsTabComplete implements TabCompleter {
 
     private final List<String> BOOLEAN = ImmutableList.of("true", "false");
     private final List<String> ROOT_SUBS = ImmutableList.of("reload", "about", "check", "info", "dump", "rank", "setrank", "group", "player");
@@ -124,7 +123,7 @@ class PermissionsTabComplete implements TabCompleter {
          */
 
         // A convenience in case I later want to replace online players with something else
-        List<String> players = null;
+        final List<String> players = null;
 
         if (sub.equals("groups")) {
             if (args.length == 3) {

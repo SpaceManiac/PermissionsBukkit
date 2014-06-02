@@ -13,9 +13,9 @@ import org.bukkit.event.player.*;
 /**
  * Listen for player-based events to keep track of players and build permissions.
  */
-class PlayerListener implements Listener {
+final class PlayerListener implements Listener {
 
-    private PermissionsPlugin plugin;
+    private final PermissionsPlugin plugin;
 
     public PlayerListener(PermissionsPlugin plugin) {
         this.plugin = plugin;

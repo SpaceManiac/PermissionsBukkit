@@ -22,14 +22,14 @@ import java.util.regex.Pattern;
 /**
  * Main class for PermissionsBukkit.
  */
-public class PermissionsPlugin extends JavaPlugin {
+public final class PermissionsPlugin extends JavaPlugin {
 
-    private PlayerListener playerListener = new PlayerListener(this);
-    private PermissionsCommand commandExecutor = new PermissionsCommand(this);
-    private PermissionsTabComplete tabCompleter = new PermissionsTabComplete(this);
-    private PermissionsMetrics metrics = new PermissionsMetrics(this);
+    private final PlayerListener playerListener = new PlayerListener(this);
+    private final PermissionsCommand commandExecutor = new PermissionsCommand(this);
+    private final PermissionsTabComplete tabCompleter = new PermissionsTabComplete(this);
+    private final PermissionsMetrics metrics = new PermissionsMetrics(this);
 
-    private HashMap<UUID, PermissionAttachment> permissions = new HashMap<UUID, PermissionAttachment>();
+    private final HashMap<UUID, PermissionAttachment> permissions = new HashMap<UUID, PermissionAttachment>();
     
     private File configFile;
     private YamlConfiguration config;

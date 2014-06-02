@@ -11,12 +11,12 @@ import java.util.UUID;
 /**
  * A class representing a permissions group.
  */
-public class Group {
+public final class Group {
 
-    private PermissionsPlugin plugin;
-    private String name;
+    private final PermissionsPlugin plugin;
+    private final String name;
 
-    protected Group(PermissionsPlugin plugin, String name) {
+    Group(PermissionsPlugin plugin, String name) {
         this.plugin = plugin;
         this.name = name;
     }

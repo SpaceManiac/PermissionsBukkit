@@ -21,9 +21,9 @@ import java.util.*;
 /**
  * CommandExecutor for /permissions
  */
-class PermissionsCommand implements CommandExecutor {
+final class PermissionsCommand implements CommandExecutor {
     
-    private PermissionsPlugin plugin;
+    private final PermissionsPlugin plugin;
 
     public PermissionsCommand(PermissionsPlugin plugin) {
         this.plugin = plugin;

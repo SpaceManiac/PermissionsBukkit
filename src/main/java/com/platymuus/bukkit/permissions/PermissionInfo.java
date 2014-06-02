@@ -7,13 +7,13 @@ import java.util.*;
 /**
  * A class representing the global and world nodes attached to a player or group.
  */
-public class PermissionInfo {
+public final class PermissionInfo {
     
     private final PermissionsPlugin plugin;
     private final ConfigurationSection node;
     private final String groupType;
     
-    protected PermissionInfo(PermissionsPlugin plugin, ConfigurationSection node, String groupType) {
+    PermissionInfo(PermissionsPlugin plugin, ConfigurationSection node, String groupType) {
         this.plugin = plugin;
         this.node = node;
         this.groupType = groupType;
