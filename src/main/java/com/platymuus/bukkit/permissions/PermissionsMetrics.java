@@ -355,8 +355,7 @@ final class PermissionsMetrics {
         public final int getValue() {
             try {
                 return value() ? 1 : 0;
-            }
-            catch (Throwable t) {
+            } catch (Throwable t) {
                 return 0;
             }
         }

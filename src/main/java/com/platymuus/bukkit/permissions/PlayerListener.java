@@ -20,14 +20,14 @@ final class PlayerListener implements Listener {
     public PlayerListener(PermissionsPlugin plugin) {
         this.plugin = plugin;
     }
-    
+
     // Keep track of player's world
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onWorldChange(PlayerChangedWorldEvent event) {
         plugin.calculateAttachment(event.getPlayer());
     }
-    
+
     // Register players when needed
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -54,7 +54,7 @@ final class PlayerListener implements Listener {
         plugin.debug("Player " + event.getPlayer().getName() + " quit, unregistering...");
         plugin.unregisterPlayer(event.getPlayer());
     }
-    
+
     // Prevent doing things in the event of permissions.build: false
 
     @EventHandler(ignoreCancelled = true)
@@ -83,7 +83,7 @@ final class PlayerListener implements Listener {
             event.setCancelled(true);
         }
     }
-    
+
     private void bother(Player player) {
         if (plugin.getConfig().getString("messages/build", "").length() > 0) {
             String message = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("messages/build", ""));

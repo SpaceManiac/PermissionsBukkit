@@ -30,7 +30,7 @@ public final class PermissionsPlugin extends JavaPlugin {
     private final PermissionsMetrics metrics = new PermissionsMetrics(this);
 
     private final HashMap<UUID, PermissionAttachment> permissions = new HashMap<UUID, PermissionAttachment>();
-    
+
     private File configFile;
     private YamlConfiguration config;
 
@@ -57,8 +57,7 @@ public final class PermissionsPlugin extends JavaPlugin {
         // Metrics are fun!
         try {
             metrics.start();
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             getLogger().warning("Failed to connect to plugin metrics: " + ex.getMessage());
         }
 
@@ -163,8 +162,10 @@ public final class PermissionsPlugin extends JavaPlugin {
     }
 
     // -- External API
+
     /**
      * Get the group with the given name.
+     *
      * @param groupName The name of the group.
      * @return A Group if it exists or null otherwise.
      */
@@ -182,6 +183,7 @@ public final class PermissionsPlugin extends JavaPlugin {
 
     /**
      * Returns a list of groups a player is in.
+     *
      * @param playerName The name of the player.
      * @return The groups this player is in. May be empty.
      * @deprecated Use UUIDs instead.
@@ -202,6 +204,7 @@ public final class PermissionsPlugin extends JavaPlugin {
 
     /**
      * Returns a list of groups a player is in.
+     *
      * @param player The uuid of the player.
      * @return The groups this player is in. May be empty.
      */
@@ -220,6 +223,7 @@ public final class PermissionsPlugin extends JavaPlugin {
 
     /**
      * Returns permission info on the given player.
+     *
      * @param playerName The name of the player.
      * @return A PermissionsInfo about this player.
      * @deprecated Use UUIDs instead.
@@ -236,6 +240,7 @@ public final class PermissionsPlugin extends JavaPlugin {
 
     /**
      * Returns permission info on the given player.
+     *
      * @param player The uuid of the player.
      * @return A PermissionsInfo about this player.
      */
@@ -250,6 +255,7 @@ public final class PermissionsPlugin extends JavaPlugin {
 
     /**
      * Returns a list of all defined groups.
+     *
      * @return The list of groups.
      */
     public List<Group> getAllGroups() {
@@ -268,7 +274,7 @@ public final class PermissionsPlugin extends JavaPlugin {
     protected PermissionsMetrics getMetrics() {
         return metrics;
     }
-    
+
     protected void registerPlayer(Player player) {
         if (permissions.containsKey(player.getUniqueId())) {
             debug("Registering " + player.getName() + ": was already registered");
@@ -283,8 +289,7 @@ public final class PermissionsPlugin extends JavaPlugin {
         if (permissions.containsKey(player.getUniqueId())) {
             try {
                 player.removeAttachment(permissions.get(player.getUniqueId()));
-            }
-            catch (IllegalArgumentException ex) {
+            } catch (IllegalArgumentException ex) {
                 debug("Unregistering " + player.getName() + ": player did not have attachment");
             }
             permissions.remove(player.getUniqueId());
@@ -347,7 +352,7 @@ public final class PermissionsPlugin extends JavaPlugin {
             calculateAttachment(getServer().getPlayer(player));
         }
     }
-    
+
     protected ConfigurationSection getNode(String node) {
         for (String entry : getConfig().getKeys(true)) {
             if (node.equalsIgnoreCase(entry) && getConfig().isConfigurationSection(entry)) {
@@ -385,7 +390,7 @@ public final class PermissionsPlugin extends JavaPlugin {
 
     protected HashMap<String, Boolean> getAllPerms(String desc, String path) {
         ConfigurationSection node = getNode(path);
-        
+
         int failures = 0;
         String firstFailure = "";
 
@@ -421,16 +426,16 @@ public final class PermissionsPlugin extends JavaPlugin {
                 }
             }
         }
-        
+
         if (failures == 1) {
             getLogger().warning("In " + desc + ": " + firstFailure + " is non-boolean.");
         } else if (failures > 1) {
-            getLogger().warning("In " + desc + ": " + firstFailure + " is non-boolean (+" + (failures-1) + " more).");
+            getLogger().warning("In " + desc + ": " + firstFailure + " is non-boolean (+" + (failures - 1) + " more).");
         }
-        
+
         return result;
     }
-    
+
     protected void debug(String message) {
         if (getConfig().getBoolean("debug", false)) {
             getLogger().info("Debug: " + message);
