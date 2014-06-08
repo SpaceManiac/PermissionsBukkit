@@ -372,10 +372,20 @@ public final class PermissionsPlugin extends JavaPlugin {
                 getConfig().set(sec.getCurrentPath(), null);
                 getConfig().set("users/" + player.getUniqueId(), sec);
                 sec.set("name", player.getName());
-                debug("Migrated " + player.getName() + " to their UUID in config");
+                debug("Migrated " + player.getName() + " to UUID " + player.getUniqueId());
                 saveConfig();
             }
         }
+
+        // make sure name field matches
+        if (sec != null) {
+            if (!player.getName().equals(sec.getString("name"))) {
+                debug("Updating name of " + player.getUniqueId() + " to: " + player.getName());
+                sec.set("name", player.getName());
+                saveConfig();
+            }
+        }
+
         return sec;
     }
 
@@ -520,9 +530,6 @@ public final class PermissionsPlugin extends JavaPlugin {
         if (node == null) {
             return calculateGroupPermissions("default", world);
         }
-
-        // make sure the node has the player's name
-        node.set("name", player.getName());
 
         String nodePath = node.getCurrentPath();
         Map<String, Boolean> perms = new LinkedHashMap<String, Boolean>();
