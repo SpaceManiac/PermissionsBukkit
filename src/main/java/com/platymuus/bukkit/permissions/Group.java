@@ -33,9 +33,18 @@ public final class Group {
         ArrayList<String> result = new ArrayList<String>();
         if (plugin.getNode("users") != null) {
             for (String user : plugin.getNode("users").getKeys(false)) {
-                for (String group : plugin.getNode("users/" + user).getStringList("groups")) {
+                ConfigurationSection node = plugin.getNode("users/" + user);
+                for (String group : node.getStringList("groups")) {
                     if (name.equalsIgnoreCase(group) && !result.contains(user)) {
-                        result.add(user);
+                        // attempt to determine the username
+                        if (node.getString("name") != null) {
+                            // converted node
+                            result.add(node.getString("name"));
+                        } else {
+                            // unconverted node, or UUID node missing "name" element
+                            result.add(user);
+                        }
+                        break;
                     }
                 }
             }
@@ -56,6 +65,7 @@ public final class Group {
                 for (String group : plugin.getNode("users/" + user).getStringList("groups")) {
                     if (name.equalsIgnoreCase(group) && !result.contains(uuid)) {
                         result.add(uuid);
+                        break;
                     }
                 }
             }

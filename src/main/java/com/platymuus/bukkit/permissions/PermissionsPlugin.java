@@ -192,8 +192,9 @@ public final class PermissionsPlugin extends JavaPlugin {
     public List<Group> getGroups(String playerName) {
         metrics.apiUsed();
         ArrayList<Group> result = new ArrayList<Group>();
-        if (getNode("users/" + playerName) != null) {
-            for (String key : getNode("users/" + playerName).getStringList("groups")) {
+        ConfigurationSection node = getUsernameNode(playerName);
+        if (node != null) {
+            for (String key : node.getStringList("groups")) {
                 result.add(new Group(this, key));
             }
         } else {
@@ -231,10 +232,11 @@ public final class PermissionsPlugin extends JavaPlugin {
     @Deprecated
     public PermissionInfo getPlayerInfo(String playerName) {
         metrics.apiUsed();
-        if (getNode("users/" + playerName) == null) {
+        ConfigurationSection node = getUsernameNode(playerName);
+        if (node == null) {
             return null;
         } else {
-            return new PermissionInfo(this, getNode("users/" + playerName), "groups");
+            return new PermissionInfo(this, node, "groups");
         }
     }
 
@@ -369,11 +371,27 @@ public final class PermissionsPlugin extends JavaPlugin {
             if (sec != null) {
                 getConfig().set(sec.getCurrentPath(), null);
                 getConfig().set("users/" + player.getUniqueId(), sec);
+                sec.set("name", player.getName());
                 debug("Migrated " + player.getName() + " to their UUID in config");
                 saveConfig();
             }
         }
         return sec;
+    }
+
+    protected ConfigurationSection getUsernameNode(String name) {
+        // try to look up node based on username rather than UUID
+        ConfigurationSection sec = getNode("users");
+        if (sec != null) {
+            for (String child : sec.getKeys(false)) {
+                ConfigurationSection node = sec.getConfigurationSection(child);
+                if (node != null && (name.equals(node.getString("name")) || name.equals("child"))) {
+                    // either the "name" field matches or the key matches
+                    return node;
+                }
+            }
+        }
+        return null;
     }
 
     protected ConfigurationSection createNode(String node) {
@@ -502,6 +520,9 @@ public final class PermissionsPlugin extends JavaPlugin {
         if (node == null) {
             return calculateGroupPermissions("default", world);
         }
+
+        // make sure the node has the player's name
+        node.set("name", player.getName());
 
         String nodePath = node.getCurrentPath();
         Map<String, Boolean> perms = new LinkedHashMap<String, Boolean>();

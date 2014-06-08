@@ -43,7 +43,7 @@ public final class PermissionInfo {
      * @return The map of permissions.
      */
     public Map<String, Boolean> getPermissions() {
-        return plugin.getAllPerms(node.getName(), node.getName());
+        return plugin.getAllPerms(node.getName(), node.getCurrentPath());
     }
 
     /**
