@@ -285,16 +285,25 @@ final class PermissionsCommand implements CommandExecutor {
                 return true;
             }
 
-            int count = 0;
-            String text = "", sep = "";
-            for (String user : plugin.getNode("users").getKeys(false)) {
-                if (plugin.getNode("users/" + user).getStringList("groups").contains(group)) {
-                    ++count;
-                    text += sep + user;
-                    sep = ", ";
+            List<String> users = new LinkedList<String>();
+            for (String userKey : plugin.getNode("users").getKeys(false)) {
+                ConfigurationSection node = plugin.getNode("users/" + userKey);
+                if (node.getStringList("groups").contains(group)) {
+                    try {
+                        // show UUID and name if available
+                        UUID uuid = UUID.fromString(userKey);
+                        String name = node.getString("name", "???");
+                        users.add(name + ChatColor.GREEN + " (" + ChatColor.WHITE + uuid + ChatColor.GREEN + ")");
+                    } catch (IllegalArgumentException ex) {
+                        // show as unconverted name-only entry
+                        users.add(userKey + ChatColor.GREEN + " (" + ChatColor.WHITE + "unconverted" + ChatColor.GREEN + ")");
+                    }
                 }
             }
-            sender.sendMessage(ChatColor.GREEN + "Users in " + ChatColor.WHITE + group + ChatColor.GREEN + " (" + ChatColor.WHITE + count + ChatColor.GREEN + "): " + ChatColor.WHITE + text);
+            sender.sendMessage(ChatColor.GREEN + "Users in " + ChatColor.WHITE + group + ChatColor.GREEN + " (" + ChatColor.WHITE + users.size() + ChatColor.GREEN + "):");
+            for (String user : users) {
+                sender.sendMessage("  " + user);
+            }
             return true;
         } else if (subcommand.equals("setperm")) {
             if (!checkPerm(sender, "group.setperm")) return true;
