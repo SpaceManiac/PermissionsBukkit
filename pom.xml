@@ -15,6 +15,10 @@
             <url>http://repo.bukkit.org/content/groups/public/</url>
         </repository>
         <repository>
+            <id>sk89q-repo</id>
+            <url>http://maven.sk89q.com/repo</url>
+        </repository>
+        <repository>
             <id>Plugin Metrics</id>
             <url>http://repo.mcstats.org/content/repositories/public</url>
         </repository>
@@ -24,7 +28,7 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.7.8-R0.1-SNAPSHOT</version>
+            <version>1.7.10-R0.1-SNAPSHOT</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
