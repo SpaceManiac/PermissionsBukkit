@@ -5,6 +5,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.*;
 
 /**
@@ -80,6 +81,15 @@ class PlayerListener implements Listener {
         }
     }
     
+    @EventHandler
+    public void onPlayerAttack(EntityDamageByEntityEvent event) {
+        if (event.isCancelled()) return;
+        if ((event.getDamager() instanceof Player) && (!((Player)event.getDamager()).hasPermission("permissions.build"))) {
+            bother((Player)event.getDamager());
+            event.setCancelled(true);
+        }
+    }
+
     private void bother(Player player) {
         if (plugin.getConfig().getString("messages.build", "").length() > 0) {
             String message = plugin.getConfig().getString("messages.build", "").replace('&', '\u00A7');
