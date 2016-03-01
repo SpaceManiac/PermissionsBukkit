@@ -29,9 +29,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.mcstats</groupId>
+            <groupId>org.mcstats.bukkit</groupId>
             <artifactId>metrics</artifactId>
-            <version>1.1</version>
+            <version>R8-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
