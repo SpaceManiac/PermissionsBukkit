@@ -27,7 +27,6 @@ public final class PermissionsPlugin extends JavaPlugin {
     private final PlayerListener playerListener = new PlayerListener(this);
     private final PermissionsCommand commandExecutor = new PermissionsCommand(this);
     private final PermissionsTabComplete tabCompleter = new PermissionsTabComplete(this);
-    private final PermissionsMetrics metrics = new PermissionsMetrics(this);
 
     private final HashMap<UUID, PermissionAttachment> permissions = new HashMap<UUID, PermissionAttachment>();
 
@@ -52,13 +51,6 @@ public final class PermissionsPlugin extends JavaPlugin {
         // Register everyone online right now
         for (Player p : getServer().getOnlinePlayers()) {
             registerPlayer(p);
-        }
-
-        // Metrics are fun!
-        try {
-            metrics.start();
-        } catch (IOException ex) {
-            getLogger().warning("Failed to connect to plugin metrics: " + ex.getMessage());
         }
 
         // How are you gentlemen
@@ -170,7 +162,6 @@ public final class PermissionsPlugin extends JavaPlugin {
      * @return A Group if it exists or null otherwise.
      */
     public Group getGroup(String groupName) {
-        metrics.apiUsed();
         if (getNode("groups") != null) {
             for (String key : getNode("groups").getKeys(false)) {
                 if (key.equalsIgnoreCase(groupName)) {
@@ -190,7 +181,6 @@ public final class PermissionsPlugin extends JavaPlugin {
      */
     @Deprecated
     public List<Group> getGroups(String playerName) {
-        metrics.apiUsed();
         ArrayList<Group> result = new ArrayList<Group>();
         ConfigurationSection node = getUsernameNode(playerName);
         if (node != null) {
@@ -210,7 +200,6 @@ public final class PermissionsPlugin extends JavaPlugin {
      * @return The groups this player is in. May be empty.
      */
     public List<Group> getGroups(UUID player) {
-        metrics.apiUsed();
         ArrayList<Group> result = new ArrayList<Group>();
         if (getNode("users/" + player) != null) {
             for (String key : getNode("users/" + player).getStringList("groups")) {
@@ -231,7 +220,6 @@ public final class PermissionsPlugin extends JavaPlugin {
      */
     @Deprecated
     public PermissionInfo getPlayerInfo(String playerName) {
-        metrics.apiUsed();
         ConfigurationSection node = getUsernameNode(playerName);
         if (node == null) {
             return null;
@@ -247,7 +235,6 @@ public final class PermissionsPlugin extends JavaPlugin {
      * @return A PermissionsInfo about this player.
      */
     public PermissionInfo getPlayerInfo(UUID player) {
-        metrics.apiUsed();
         if (getNode("users/" + player) == null) {
             return null;
         } else {
@@ -261,7 +248,6 @@ public final class PermissionsPlugin extends JavaPlugin {
      * @return The list of groups.
      */
     public List<Group> getAllGroups() {
-        metrics.apiUsed();
         ArrayList<Group> result = new ArrayList<Group>();
         if (getNode("groups") != null) {
             for (String key : getNode("groups").getKeys(false)) {
@@ -269,12 +255,6 @@ public final class PermissionsPlugin extends JavaPlugin {
             }
         }
         return result;
-    }
-
-    // -- Plugin stuff
-
-    protected PermissionsMetrics getMetrics() {
-        return metrics;
     }
 
     protected void registerPlayer(Player player) {
