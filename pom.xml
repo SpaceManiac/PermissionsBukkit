@@ -60,7 +60,7 @@
                         <configuration>
                             <artifactSet>
                                 <includes>
-                                    <include>org.mcstats</include>
+                                    <include>org.mcstats.bukkit</include>
                                 </includes>
                             </artifactSet>
                         </configuration>
