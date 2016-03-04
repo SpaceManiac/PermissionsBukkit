@@ -62,7 +62,7 @@ final class PlayerListener implements Listener {
         if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_AIR) {
             return;
         }
-        if (!event.getPlayer().hasPermission("permissions.build")) {
+        if (!event.getPlayer().hasPermission("permissions.interact")) {
             bother(event.getPlayer());
             event.setCancelled(true);
         }
