@@ -9,6 +9,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 
 /**
  * Listen for player-based events to keep track of players and build permissions.
@@ -81,6 +83,11 @@ final class PlayerListener implements Listener {
         if (!event.getPlayer().hasPermission("permissions.build")) {
             bother(event.getPlayer());
             event.setCancelled(true);
+            try {
+                Block block = event.getClickedBlock();
+                ((Sign) block.getState()).update(true);
+            } catch (Exception ex){
+            }
         }
     }
 
