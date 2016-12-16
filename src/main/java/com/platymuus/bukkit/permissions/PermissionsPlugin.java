@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -285,6 +286,8 @@ public final class PermissionsPlugin extends JavaPlugin {
         PermissionAttachment attachment = player.addAttachment(this);
         permissions.put(player.getUniqueId(), attachment);
         calculateAttachment(player);
+
+        updateName(player);
     }
 
     protected void unregisterPlayer(Player player) {
@@ -298,6 +301,27 @@ public final class PermissionsPlugin extends JavaPlugin {
         } else {
             debug("Unregistering " + player.getName() + ": was not registered");
         }
+    }
+
+    protected void updateName(Player player) {
+        ConfigurationSection node = getUserNode(player);
+
+        if (node == null || player.getName().equals(node.getString("name")))
+            return;
+
+        debug("Updating name for player " + player.getUniqueId() + " : " + player.getName());
+
+        Map<String, Object> values = node.getValues(true);
+        values.remove("name");
+        node.set("name", player.getName());
+
+        for (Entry<String, Object> value : values.entrySet())
+        {
+        	node.set(value.getKey(), null);
+            node.set(value.getKey(), value.getValue());
+        }
+
+        saveConfig();
     }
 
     protected void refreshForPlayer(UUID player) {
